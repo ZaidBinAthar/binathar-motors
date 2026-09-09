@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #e11d48;
+  --color-primary-dark: #be123c;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #334155;
+  --color-text-heading: #0f172a;
+  --color-text-muted: #94a3b8;
+
+  --color-dark-surface: #0f172a;
+  --color-dark-surface-alt: #1e293b;
+  --color-dark-border: #334155;
+  --color-dark-text: #cbd5e1;
+  --color-dark-text-heading: #f1f5f9;
+  --color-dark-text-muted: #64748b;
+}
+
+body {
+  @apply m-0 bg-surface text-text font-sans;
+}
+
+.dark body {
+  @apply bg-dark-surface text-dark-text;
+}
+
+#root {
+  @apply min-h-screen flex flex-col;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-surface-alt;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-surface-alt;
+}
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-dark-border;
+}
