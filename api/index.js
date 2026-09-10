@@ -13,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
 app.use(express.static(path.join(__dirname, "../client/dist")));
+app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 
 app.use((req, res, next) => {
     if (req.path.startsWith("/api/")) {
