@@ -11,7 +11,7 @@ const migration = async () => {
 
     console.log("Migration complete.");
 
-    const bcrypt = await import("bcrypt");
+    const bcrypt = await import("bcryptjs");
 
     const ownerEmail = "zaid@binatharmotors.com";
     const ownerPassword = "BinAthar@2024";
