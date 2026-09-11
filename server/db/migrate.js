@@ -2,54 +2,61 @@ import "dotenv/config";
 import pool from "./index.js";
 
 const migration = async () => {
-    console.log("Running migration: update users table for email/password auth...");
+    console.log("Running migration: inquiries chat system + auth cleanup...");
+
+    // Add user_id to inquiries (nullable for anonymous users)
+    await pool.query(`
+        ALTER TABLE inquiries
+        ADD COLUMN IF NOT EXISTS user_id INT REFERENCES users(id) ON DELETE SET NULL
+    `);
+
+    // Add updated_at to inquiries
+    await pool.query(`
+        ALTER TABLE inquiries
+        ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `);
+
+    // Create inquiry_messages table
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS inquiry_messages (
+            id           SERIAL    PRIMARY KEY,
+            inquiry_id   INT       NOT NULL REFERENCES inquiries(id) ON DELETE CASCADE,
+            sender       VARCHAR(20) NOT NULL,
+            message      TEXT      NOT NULL,
+            created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Index for faster lookups
+    await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_inquiry_messages_inquiry
+        ON inquiry_messages(inquiry_id)
+    `);
 
     await pool.query(`
-        ALTER TABLE users
-        ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)
+        CREATE INDEX IF NOT EXISTS idx_inquiries_user
+        ON inquiries(user_id)
     `);
 
-    await pool.query(`
-        ALTER TABLE users
-        DROP COLUMN IF EXISTS google_id
+    console.log("Migration complete.");
+
+    const tables = await pool.query(`
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema = 'public' ORDER BY table_name
     `);
+    console.log("Tables:", tables.rows.map(r => r.table_name).join(", "));
 
-    console.log("Users table updated.");
-
-    const bcrypt = await import("bcryptjs");
-
-    const ownerEmail = "zaid@binatharmotors.com";
-    const ownerPassword = "BinAthar@2024";
-
-    const existing = await pool.query(
-        "SELECT id FROM users WHERE email = $1",
-        [ownerEmail]
-    );
-
-    const hash = await bcrypt.default.hash(ownerPassword, 10);
-
-    if (existing.rows.length === 0) {
-        await pool.query(
-            `INSERT INTO users (name, email, password_hash, role, status)
-             VALUES ($1, $2, $3, 'owner', 'active')`,
-            ["Zaid Bin Athar", ownerEmail, hash]
-        );
-        console.log(`Owner account created: ${ownerEmail}`);
-    } else {
-        await pool.query(
-            "UPDATE users SET password_hash = $1, role = 'owner', status = 'active' WHERE email = $2",
-            [hash, ownerEmail]
-        );
-        console.log(`Owner account updated: ${ownerEmail}`);
-    }
-
-    const columns = await pool.query(`
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_name = 'users'
-        ORDER BY ordinal_position
+    const inquiryCols = await pool.query(`
+        SELECT column_name FROM information_schema.columns
+        WHERE table_name = 'inquiries' ORDER BY ordinal_position
     `);
-    console.log("Current users columns:", columns.rows.map(r => r.column_name).join(", "));
+    console.log("Inquiries columns:", inquiryCols.rows.map(r => r.column_name).join(", "));
+
+    const msgCols = await pool.query(`
+        SELECT column_name FROM information_schema.columns
+        WHERE table_name = 'inquiry_messages' ORDER BY ordinal_position
+    `);
+    console.log("Inquiry_messages columns:", msgCols.rows.map(r => r.column_name).join(", "));
 
     process.exit(0);
 };

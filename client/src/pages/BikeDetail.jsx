@@ -11,6 +11,8 @@ const BikeDetail = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [inquiry, setInquiry] = useState({ name: "", phone: "", message: "" });
   const [inquirySent, setInquirySent] = useState(false);
+  const [inquiryError, setInquiryError] = useState("");
+  const [inquiryLoading, setInquiryLoading] = useState(false);
 
   useEffect(() => {
     api
@@ -23,10 +25,25 @@ const BikeDetail = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleInquiry = (e) => {
+  const handleInquiry = async (e) => {
     e.preventDefault();
-    setInquirySent(true);
-    setInquiry({ name: "", phone: "", message: "" });
+    setInquiryError("");
+    setInquiryLoading(true);
+
+    try {
+      await api.post("/inquiries", {
+        bike_id: parseInt(id),
+        customer_name: inquiry.name,
+        customer_phone: inquiry.phone,
+        message: inquiry.message,
+      });
+      setInquirySent(true);
+      setInquiry({ name: "", phone: "", message: "" });
+    } catch (err) {
+      setInquiryError(err.response?.data?.message || "Failed to send inquiry");
+    } finally {
+      setInquiryLoading(false);
+    }
   };
 
   if (loading) {
@@ -52,7 +69,6 @@ const BikeDetail = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Back */}
       <Link
         to="/bikes"
         className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-dark-text-muted hover:text-primary no-underline mb-6"
@@ -83,9 +99,7 @@ const BikeDetail = () => {
                   key={i}
                   onClick={() => setActiveImg(i)}
                   className={`w-16 h-16 rounded-lg overflow-hidden border-2 flex-shrink-0 ${
-                    activeImg === i
-                      ? "border-primary"
-                      : "border-transparent"
+                    activeImg === i ? "border-primary" : "border-transparent"
                   }`}
                 >
                   <img src={img.image_url} alt="" className="w-full h-full object-cover" />
@@ -119,7 +133,6 @@ const BikeDetail = () => {
             </p>
           </div>
 
-          {/* Specs grid */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             {[
               { icon: FaCalendarAlt, label: "Year", value: bike.model_year },
@@ -167,6 +180,9 @@ const BikeDetail = () => {
               </div>
             ) : (
               <form onSubmit={handleInquiry} className="space-y-3">
+                {inquiryError && (
+                  <p className="text-red-600 dark:text-red-400 text-sm">{inquiryError}</p>
+                )}
                 <input
                   type="text"
                   placeholder="Your name"
@@ -192,9 +208,10 @@ const BikeDetail = () => {
                 />
                 <button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2.5 rounded-lg transition-colors"
+                  disabled={inquiryLoading}
+                  className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  Send Inquiry
+                  {inquiryLoading ? "Sending..." : "Send Inquiry"}
                 </button>
               </form>
             )}

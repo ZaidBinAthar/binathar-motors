@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HiMenu, HiX, HiSun, HiMoon, HiUser } from "react-icons/hi";
+import { FaUsers, FaComments } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isOwner } = useAuth();
   const { dark, toggle } = useTheme();
   const location = useLocation();
 
@@ -22,17 +23,11 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-dark-surface/80 backdrop-blur-md border-b border-border dark:border-dark-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 no-underline">
-            <span className="text-xl font-bold text-primary">
-              BinAthar
-            </span>
-            <span className="text-xl font-semibold text-text-heading dark:text-dark-text-heading">
-              Motors
-            </span>
+            <span className="text-xl font-bold text-primary">BinAthar</span>
+            <span className="text-xl font-semibold text-text-heading dark:text-dark-text-heading">Motors</span>
           </Link>
 
-          {/* Desktop links */}
           <div className="hidden md:flex items-center gap-6">
             {links.map((link) => (
               <Link
@@ -49,7 +44,6 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Right side */}
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={toggle}
@@ -64,19 +58,38 @@ const Navbar = () => {
                 {isAdmin && (
                   <Link
                     to="/admin"
-                    className="text-sm font-medium text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading no-underline"
+                    className={`text-sm font-medium no-underline transition-colors ${
+                      isActive("/admin") ? "text-primary" : "text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading"
+                    }`}
                   >
                     Dashboard
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    to="/admin/inquiries"
+                    className={`flex items-center gap-1 text-sm font-medium no-underline transition-colors ${
+                      isActive("/admin/inquiries") ? "text-primary" : "text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading"
+                    }`}
+                  >
+                    <FaComments size={13} /> Inquiries
+                  </Link>
+                )}
+                {isOwner && (
+                  <Link
+                    to="/admin/users"
+                    className={`flex items-center gap-1 text-sm font-medium no-underline transition-colors ${
+                      isActive("/admin/users") ? "text-primary" : "text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading"
+                    }`}
+                  >
+                    <FaUsers size={13} /> Users
                   </Link>
                 )}
                 <div className="flex items-center gap-2 text-sm text-text dark:text-dark-text">
                   <HiUser size={16} />
                   <span className="max-w-[100px] truncate">{user.name}</span>
                 </div>
-                <button
-                  onClick={logout}
-                  className="text-sm text-text-muted hover:text-primary transition-colors"
-                >
+                <button onClick={logout} className="text-sm text-text-muted hover:text-primary transition-colors">
                   Logout
                 </button>
               </div>
@@ -90,7 +103,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface-alt text-text dark:text-dark-text"
@@ -100,7 +112,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {open && (
         <div className="md:hidden border-t border-border dark:border-dark-border bg-white dark:bg-dark-surface">
           <div className="px-4 py-3 space-y-2">
@@ -122,30 +133,26 @@ const Navbar = () => {
             {user ? (
               <>
                 {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setOpen(false)}
-                    className="block py-2 text-sm font-medium text-text dark:text-dark-text no-underline px-3"
-                  >
+                  <Link to="/admin" onClick={() => setOpen(false)} className="block py-2 text-sm font-medium text-text dark:text-dark-text no-underline px-3">
                     Dashboard
                   </Link>
                 )}
-                <button
-                  onClick={() => {
-                    logout();
-                    setOpen(false);
-                  }}
-                  className="block w-full text-left py-2 text-sm text-primary px-3"
-                >
+                {isAdmin && (
+                  <Link to="/admin/inquiries" onClick={() => setOpen(false)} className="flex items-center gap-2 py-2 text-sm font-medium text-text dark:text-dark-text no-underline px-3">
+                    <FaComments size={13} /> Inquiries
+                  </Link>
+                )}
+                {isOwner && (
+                  <Link to="/admin/users" onClick={() => setOpen(false)} className="flex items-center gap-2 py-2 text-sm font-medium text-text dark:text-dark-text no-underline px-3">
+                    <FaUsers size={13} /> Users
+                  </Link>
+                )}
+                <button onClick={() => { logout(); setOpen(false); }} className="block w-full text-left py-2 text-sm text-primary px-3">
                   Logout
                 </button>
               </>
             ) : (
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="block py-2 text-sm font-medium text-primary no-underline px-3"
-              >
+              <Link to="/login" onClick={() => setOpen(false)} className="block py-2 text-sm font-medium text-primary no-underline px-3">
                 Login
               </Link>
             )}

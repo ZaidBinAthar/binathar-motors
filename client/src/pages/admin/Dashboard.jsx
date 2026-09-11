@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments } from "react-icons/fa";
 import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
 
 const Dashboard = () => {
@@ -8,6 +10,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const { isOwner } = useAuth();
 
   const load = () => {
     setLoading(true);
@@ -49,15 +52,38 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Quick links */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <Link to="/admin/inquiries" className="flex items-center gap-3 bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4 hover:border-primary/50 transition-colors no-underline">
+          <FaComments className="text-primary" size={20} />
+          <div>
+            <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Inquiries</p>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">Customer messages</p>
+          </div>
+        </Link>
+        {isOwner && (
+          <Link to="/admin/users" className="flex items-center gap-3 bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4 hover:border-primary/50 transition-colors no-underline">
+            <FaUsers className="text-primary" size={20} />
+            <div>
+              <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Users</p>
+              <p className="text-xs text-text-muted dark:text-dark-text-muted">Manage accounts</p>
+            </div>
+          </Link>
+        )}
+        <div className="flex items-center gap-3 bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4">
+          <FaMotorcycle className="text-primary" size={20} />
+          <div>
+            <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">{bikes.length} Bikes</p>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">In inventory</p>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading">
-            Bike Inventory
-          </h1>
-          <p className="text-sm text-text-muted dark:text-dark-text-muted">
-            {bikes.length} bike{bikes.length !== 1 ? "s" : ""}
-          </p>
+          <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading">Bike Inventory</h1>
+          <p className="text-sm text-text-muted dark:text-dark-text-muted">{bikes.length} bike{bikes.length !== 1 ? "s" : ""}</p>
         </div>
         <button
           onClick={() => { setEditing(null); setShowForm(true); }}
@@ -116,45 +142,29 @@ const Dashboard = () => {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium text-text-heading dark:text-dark-text-heading">
-                        {bike.brand} {bike.model}
-                      </p>
-                      {bike.color && (
-                        <p className="text-xs text-text-muted dark:text-dark-text-muted">{bike.color}</p>
-                      )}
+                      <p className="font-medium text-text-heading dark:text-dark-text-heading">{bike.brand} {bike.model}</p>
+                      {bike.color && <p className="text-xs text-text-muted dark:text-dark-text-muted">{bike.color}</p>}
                     </td>
                     <td className="px-4 py-3 text-text dark:text-dark-text">{bike.model_year}</td>
-                    <td className="px-4 py-3 font-medium text-text-heading dark:text-dark-text-heading">
-                      Rs. {Number(bike.selling_price).toLocaleString()}
-                    </td>
+                    <td className="px-4 py-3 font-medium text-text-heading dark:text-dark-text-heading">Rs. {Number(bike.selling_price).toLocaleString()}</td>
                     <td className="px-4 py-3 capitalize text-text dark:text-dark-text">{bike.condition}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                          bike.status === "available"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-                            : bike.status === "sold"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400"
-                        }`}
-                      >
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        bike.status === "available"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                          : bike.status === "sold"
+                          ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400"
+                      }`}>
                         {bike.status}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(bike)}
-                          className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors"
-                          title="Edit"
-                        >
+                        <button onClick={() => handleEdit(bike)} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Edit">
                           <FaEdit size={14} />
                         </button>
-                        <button
-                          onClick={() => handleDelete(bike.id, bike.brand, bike.model)}
-                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors"
-                          title="Delete"
-                        >
+                        <button onClick={() => handleDelete(bike.id, bike.brand, bike.model)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors" title="Delete">
                           <FaTrash size={14} />
                         </button>
                       </div>
