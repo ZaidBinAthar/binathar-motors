@@ -15,17 +15,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 
-app.use((req, res, next) => {
-    if (req.path.startsWith("/api/")) {
-        req.url = req.path.replace("/api", "");
-        req.path = req.url;
-        next();
-    } else {
-        res.sendFile(path.join(__dirname, "../client/dist/index.html"));
-    }
-});
-
-app.get("/test", async (req, res) => {
+app.get("/api/test", async (req, res) => {
     try {
         const result = await pool.query("SELECT NOW()");
         res.json({
@@ -39,8 +29,8 @@ app.get("/test", async (req, res) => {
     }
 });
 
-app.use("/auth", authRoutes);
-app.use("/bikes", bikesRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/bikes", bikesRoutes);
 
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, "../client/dist/index.html"));
