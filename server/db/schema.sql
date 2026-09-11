@@ -21,14 +21,14 @@ DROP TABLE IF EXISTS users;
 -- USERS
 -- =========================================
 CREATE TABLE users (
-    id         SERIAL        PRIMARY KEY,
-    google_id  VARCHAR (255) UNIQUE,
-    name       VARCHAR (150) NOT NULL,
-    email      VARCHAR (255) UNIQUE NOT NULL,
-    role       VARCHAR (20)  DEFAULT 'staff',
-    status     VARCHAR (20)  DEFAULT 'pending',
-    last_login TIMESTAMP,
-    created_at TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
+    id            SERIAL        PRIMARY KEY,
+    name          VARCHAR (150) NOT NULL,
+    email         VARCHAR (255) UNIQUE NOT NULL,
+    password_hash VARCHAR (255),
+    role          VARCHAR (20)  DEFAULT 'staff',
+    status        VARCHAR (20)  DEFAULT 'pending',
+    last_login    TIMESTAMP,
+    created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================================
