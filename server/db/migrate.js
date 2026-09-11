@@ -2,14 +2,19 @@ import "dotenv/config";
 import pool from "./index.js";
 
 const migration = async () => {
-    console.log("Running migration: add password_hash to users...");
+    console.log("Running migration: update users table for email/password auth...");
 
     await pool.query(`
         ALTER TABLE users
         ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)
     `);
 
-    console.log("Migration complete.");
+    await pool.query(`
+        ALTER TABLE users
+        DROP COLUMN IF EXISTS google_id
+    `);
+
+    console.log("Users table updated.");
 
     const bcrypt = await import("bcryptjs");
 
@@ -21,8 +26,9 @@ const migration = async () => {
         [ownerEmail]
     );
 
+    const hash = await bcrypt.default.hash(ownerPassword, 10);
+
     if (existing.rows.length === 0) {
-        const hash = await bcrypt.default.hash(ownerPassword, 10);
         await pool.query(
             `INSERT INTO users (name, email, password_hash, role, status)
              VALUES ($1, $2, $3, 'owner', 'active')`,
@@ -30,13 +36,20 @@ const migration = async () => {
         );
         console.log(`Owner account created: ${ownerEmail}`);
     } else {
-        const hash = await bcrypt.default.hash(ownerPassword, 10);
         await pool.query(
             "UPDATE users SET password_hash = $1, role = 'owner', status = 'active' WHERE email = $2",
             [hash, ownerEmail]
         );
         console.log(`Owner account updated: ${ownerEmail}`);
     }
+
+    const columns = await pool.query(`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = 'users'
+        ORDER BY ordinal_position
+    `);
+    console.log("Current users columns:", columns.rows.map(r => r.column_name).join(", "));
 
     process.exit(0);
 };
