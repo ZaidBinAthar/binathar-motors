@@ -18,6 +18,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 app.use((req, res, next) => {
     if (req.path.startsWith("/api/")) {
         req.url = req.path.replace("/api", "");
+        req.path = req.url;
         next();
     } else {
         res.sendFile(path.join(__dirname, "../client/dist/index.html"));
