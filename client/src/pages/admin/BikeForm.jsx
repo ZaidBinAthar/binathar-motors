@@ -39,14 +39,20 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const uploadImages = async (bikeId) => {
+const uploadImages = async (bikeId) => {
     if (files.length === 0) return;
     const fd = new FormData();
     files.forEach((f) => fd.append("images", f));
-    await api.post(`/bikes/${bikeId}/images`, fd, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const res = await api.post(`/bikes/${bikeId}/images`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
     });
-  };
+    if (res.data.images && res.data.images.length > 0) {
+        const firstNew = res.data.images[0];
+        if (!firstNew.is_cover) {
+            await api.put(`/bikes/${bikeId}/images/${firstNew.id}/cover`);
+        }
+    }
+};
 
   const deleteExistingImage = async (imageId) => {
     try {

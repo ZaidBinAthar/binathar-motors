@@ -96,6 +96,7 @@ const Dashboard = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border dark:border-dark-border">
+                  <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Image</th>
                   <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Bike</th>
                   <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Year</th>
                   <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Price</th>
@@ -107,6 +108,13 @@ const Dashboard = () => {
               <tbody>
                 {bikes.map((bike) => (
                   <tr key={bike.id} className="border-b border-border dark:border-dark-border last:border-0 hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">
+                    <td className="px-4 py-3">
+                      {bike.cover_image ? (
+                        <img src={bike.cover_image} alt="" className="w-10 h-10 rounded object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-surface-alt dark:bg-dark-surface flex items-center justify-center text-text-muted text-xs">No img</div>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-text-heading dark:text-dark-text-heading">
                         {bike.brand} {bike.model}
