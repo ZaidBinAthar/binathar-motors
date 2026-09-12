@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaKey, FaUsers, FaUser, FaUserMinus, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTrash, FaKey, FaUsers, FaUserMinus, FaTimes, FaEdit } from "react-icons/fa";
 import api from "../../api/axios";
 
 const roleColors = {
@@ -13,14 +13,18 @@ const Users = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
     const [resetUser, setResetUser] = useState(null);
     const [newPassword, setNewPassword] = useState("");
     const [myPassword, setMyPassword] = useState({ current: "", newP: "", confirm: "" });
     const [myPwMsg, setMyPwMsg] = useState("");
     const [myPwErr, setMyPwErr] = useState("");
-    const [addForm, setAddForm] = useState({ name: "", email: "", password: "", role: "staff" });
+    const [addForm, setAddForm] = useState({ name: "", username: "", email: "", password: "", role: "staff" });
     const [addErr, setAddErr] = useState("");
     const [addLoading, setAddLoading] = useState(false);
+    const [editForm, setEditForm] = useState({ name: "", username: "", email: "", role: "staff", status: "active" });
+    const [editErr, setEditErr] = useState("");
+    const [editLoading, setEditLoading] = useState(false);
 
     const load = () => {
         setLoading(true);
@@ -38,7 +42,7 @@ const Users = () => {
         setAddLoading(true);
         try {
             await api.post("/auth/users", addForm);
-            setAddForm({ name: "", email: "", password: "", role: "staff" });
+            setAddForm({ name: "", username: "", email: "", password: "", role: "staff" });
             setShowAddForm(false);
             load();
         } catch (err) {
@@ -48,19 +52,28 @@ const Users = () => {
         }
     };
 
-    const handleUpdateRole = async (id, role) => {
+    const handleEditUser = async (e) => {
+        e.preventDefault();
+        setEditErr("");
+        setEditLoading(true);
         try {
-            await api.put(`/auth/users/${id}`, { role });
+            await api.put(`/auth/users/${editingUser.id}`, {
+                name: editForm.name,
+                role: editForm.role,
+                status: editForm.status,
+            });
+            setEditingUser(null);
             load();
         } catch (err) {
-            alert(err.response?.data?.message || "Failed");
+            setEditErr(err.response?.data?.message || "Failed to update user");
+        } finally {
+            setEditLoading(false);
         }
     };
 
     const handleToggleStatus = async (id, currentStatus) => {
-        const newStatus = currentStatus === "active" ? "disabled" : "active";
         try {
-            await api.put(`/auth/users/${id}`, { status: newStatus });
+            await api.put(`/auth/users/${id}`, { status: currentStatus === "active" ? "disabled" : "active" });
             load();
         } catch (err) {
             alert(err.response?.data?.message || "Failed");
@@ -112,6 +125,14 @@ const Users = () => {
         }
     };
 
+    const openEdit = (u) => {
+        setEditForm({ name: u.name, username: u.username, email: u.email, role: u.role, status: u.status });
+        setEditErr("");
+        setEditingUser(u);
+    };
+
+    const inputCls = "w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <div className="flex items-center justify-between mb-8">
@@ -119,10 +140,7 @@ const Users = () => {
                     <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading">User Management</h1>
                     <p className="text-sm text-text-muted dark:text-dark-text-muted">{users.length} users</p>
                 </div>
-                <button
-                    onClick={() => { setShowAddForm(true); setAddErr(""); setAddForm({ name: "", email: "", password: "", role: "staff" }); }}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
-                >
+                <button onClick={() => { setShowAddForm(true); setAddErr(""); setAddForm({ name: "", username: "", email: "", password: "", role: "staff" }); }} className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors">
                     <FaPlus size={14} /> Add User
                 </button>
             </div>
@@ -133,15 +151,15 @@ const Users = () => {
                 <form onSubmit={handleChangeMyPassword} className="flex flex-col sm:flex-row gap-3 items-end">
                     <div className="flex-1 w-full">
                         <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Current Password</label>
-                        <input type="password" value={myPassword.current} onChange={(e) => setMyPassword({ ...myPassword, current: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm" />
+                        <input type="password" value={myPassword.current} onChange={(e) => setMyPassword({ ...myPassword, current: e.target.value })} required className={inputCls} />
                     </div>
                     <div className="flex-1 w-full">
                         <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">New Password</label>
-                        <input type="password" value={myPassword.newP} onChange={(e) => setMyPassword({ ...myPassword, newP: e.target.value })} required minLength={6} className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm" />
+                        <input type="password" value={myPassword.newP} onChange={(e) => setMyPassword({ ...myPassword, newP: e.target.value })} required minLength={6} className={inputCls} />
                     </div>
                     <div className="flex-1 w-full">
                         <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Confirm</label>
-                        <input type="password" value={myPassword.confirm} onChange={(e) => setMyPassword({ ...myPassword, confirm: e.target.value })} required minLength={6} className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm" />
+                        <input type="password" value={myPassword.confirm} onChange={(e) => setMyPassword({ ...myPassword, confirm: e.target.value })} required minLength={6} className={inputCls} />
                     </div>
                     <button type="submit" className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors whitespace-nowrap">Update</button>
                 </form>
@@ -161,6 +179,7 @@ const Users = () => {
                             <thead>
                                 <tr className="border-b border-border dark:border-dark-border">
                                     <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">User</th>
+                                    <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Username</th>
                                     <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Role</th>
                                     <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Status</th>
                                     <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Last Login</th>
@@ -175,23 +194,15 @@ const Users = () => {
                                             <p className="text-xs text-text-muted dark:text-dark-text-muted">{u.email}</p>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <select
-                                                value={u.role}
-                                                onChange={(e) => handleUpdateRole(u.id, e.target.value)}
-                                                className={`text-xs font-medium px-2 py-1 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface ${roleColors[u.role]}`}
-                                            >
-                                                <option value="owner">Owner</option>
-                                                <option value="admin">Admin</option>
-                                                <option value="staff">Staff</option>
-                                                <option value="user">User</option>
-                                            </select>
+                                            <span className="text-sm text-text dark:text-dark-text font-mono">@{u.username}</span>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                                u.status === "active"
-                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-                                                    : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                                            }`}>
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${roleColors[u.role]}`}>
+                                                {u.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${u.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"}`}>
                                                 {u.status}
                                             </span>
                                         </td>
@@ -200,7 +211,10 @@ const Users = () => {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-end gap-1">
-                                                <button onClick={() => { setResetUser(u); setNewPassword(""); }} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Reset password">
+                                                <button onClick={() => openEdit(u)} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Edit user">
+                                                    <FaEdit size={13} />
+                                                </button>
+                                                <button onClick={() => { setResetUser(u); setNewPassword(""); }} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-yellow-500 transition-colors" title="Reset password">
                                                     <FaKey size={13} />
                                                 </button>
                                                 <button onClick={() => handleToggleStatus(u.id, u.status)} className={`p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors ${u.status === "active" ? "text-text-muted hover:text-red-500" : "text-text-muted hover:text-green-500"}`} title={u.status === "active" ? "Disable" : "Enable"}>
@@ -221,85 +235,94 @@ const Users = () => {
 
             {/* Add user modal */}
             {showAddForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                    <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border p-6 w-full max-w-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-text-heading dark:text-dark-text-heading">Add New User</h3>
-                            <button onClick={() => setShowAddForm(false)} className="text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading">
-                                <FaTimes size={18} />
-                            </button>
+                <Modal onClose={() => setShowAddForm(false)} title="Add New User">
+                    {addErr && <p className="text-red-600 dark:text-red-400 text-sm mb-3">{addErr}</p>}
+                    <form onSubmit={handleAddUser} className="space-y-3">
+                        <input type="text" placeholder="Full name" required value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} className={inputCls} />
+                        <input type="text" placeholder="Username (min 3 chars)" required minLength={3} value={addForm.username} onChange={(e) => setAddForm({ ...addForm, username: e.target.value })} className={inputCls} />
+                        <input type="email" placeholder="Email" required value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} className={inputCls} />
+                        <input type="password" placeholder="Password (min 6 chars)" required minLength={6} value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} className={inputCls} />
+                        <select value={addForm.role} onChange={(e) => setAddForm({ ...addForm, role: e.target.value })} className={inputCls}>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                            <option value="owner">Owner</option>
+                        </select>
+                        <div className="flex gap-3 pt-2">
+                            <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">Cancel</button>
+                            <button type="submit" disabled={addLoading} className="flex-1 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50">{addLoading ? "Creating..." : "Create"}</button>
                         </div>
-                        {addErr && <p className="text-red-600 dark:text-red-400 text-sm mb-3">{addErr}</p>}
-                        <form onSubmit={handleAddUser} className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="Full name"
-                                required
-                                value={addForm.name}
-                                onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm"
-                            />
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                required
-                                value={addForm.email}
-                                onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm"
-                            />
-                            <input
-                                type="password"
-                                placeholder="Password (min 6 chars)"
-                                required
-                                minLength={6}
-                                value={addForm.password}
-                                onChange={(e) => setAddForm({ ...addForm, password: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm"
-                            />
-                            <select
-                                value={addForm.role}
-                                onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm"
-                            >
-                                <option value="staff">Staff</option>
-                                <option value="admin">Admin</option>
-                                <option value="user">User</option>
-                                <option value="owner">Owner</option>
-                            </select>
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">Cancel</button>
-                                <button type="submit" disabled={addLoading} className="flex-1 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50">
-                                    {addLoading ? "Creating..." : "Create"}
-                                </button>
+                    </form>
+                </Modal>
+            )}
+
+            {/* Edit user modal */}
+            {editingUser && (
+                <Modal onClose={() => setEditingUser(null)} title={`Edit — ${editingUser.name}`}>
+                    {editErr && <p className="text-red-600 dark:text-red-400 text-sm mb-3">{editErr}</p>}
+                    <form onSubmit={handleEditUser} className="space-y-3">
+                        <div>
+                            <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Name</label>
+                            <input type="text" required value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className={inputCls} />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Username</label>
+                            <input type="text" value={editForm.username} disabled className={inputCls + " opacity-60 cursor-not-allowed"} />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Email</label>
+                            <input type="email" value={editForm.email} disabled className={inputCls + " opacity-60 cursor-not-allowed"} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Role</label>
+                                <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className={inputCls}>
+                                    <option value="owner">Owner</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="staff">Staff</option>
+                                    <option value="user">User</option>
+                                </select>
                             </div>
-                        </form>
-                    </div>
-                </div>
+                            <div>
+                                <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Status</label>
+                                <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className={inputCls}>
+                                    <option value="active">Active</option>
+                                    <option value="disabled">Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                            <button type="button" onClick={() => setEditingUser(null)} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">Cancel</button>
+                            <button type="submit" disabled={editLoading} className="flex-1 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50">{editLoading ? "Saving..." : "Save"}</button>
+                        </div>
+                    </form>
+                </Modal>
             )}
 
             {/* Reset password modal */}
             {resetUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                    <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border p-6 w-full max-w-sm">
-                        <h3 className="text-lg font-semibold text-text-heading dark:text-dark-text-heading mb-4">
-                            Reset Password — {resetUser.name}
-                        </h3>
-                        <input
-                            type="password"
-                            placeholder="New password (min 6 chars)"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text text-sm mb-4"
-                        />
-                        <div className="flex gap-3">
-                            <button onClick={() => { setResetUser(null); setNewPassword(""); }} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">Cancel</button>
-                            <button onClick={handleResetPassword} className="flex-1 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors">Reset</button>
-                        </div>
+                <Modal onClose={() => { setResetUser(null); setNewPassword(""); }} title={`Reset Password — ${resetUser.name}`}>
+                    <input type="password" placeholder="New password (min 6 chars)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={inputCls + " mb-4"} />
+                    <div className="flex gap-3">
+                        <button onClick={() => { setResetUser(null); setNewPassword(""); }} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">Cancel</button>
+                        <button onClick={handleResetPassword} className="flex-1 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors">Reset</button>
                     </div>
-                </div>
+                </Modal>
             )}
         </div>
     );
 };
+
+const Modal = ({ onClose, title, children }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border p-6 w-full max-w-sm">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-text-heading dark:text-dark-text-heading">{title}</h3>
+                <button onClick={onClose} className="text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading"><FaTimes size={18} /></button>
+            </div>
+            {children}
+        </div>
+    </div>
+);
 
 export default Users;

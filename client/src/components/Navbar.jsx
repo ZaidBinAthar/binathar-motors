@@ -85,9 +85,14 @@ const Navbar = () => {
                     <FaUsers size={13} /> Users
                   </Link>
                 )}
-                <div className="flex items-center gap-2 text-sm text-text dark:text-dark-text">
-                  <HiUser size={16} />
-                  <span className="max-w-[100px] truncate">{user.name}</span>
+                <div className="flex items-center gap-2.5 pl-3 border-l border-border dark:border-dark-border">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">{user.name?.charAt(0)?.toUpperCase()}</span>
+                  </div>
+                  <div className="hidden lg:block">
+                    <p className="text-sm font-medium text-text-heading dark:text-dark-text-heading leading-tight">{user.name}</p>
+                    <p className="text-xs text-text-muted dark:text-dark-text-muted leading-tight">@{user.username}</p>
+                  </div>
                 </div>
                 <button onClick={logout} className="text-sm text-text-muted hover:text-primary transition-colors">
                   Logout

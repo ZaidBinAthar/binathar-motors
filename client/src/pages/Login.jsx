@@ -8,6 +8,7 @@ const Login = () => {
 
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -24,9 +25,9 @@ const Login = () => {
 
     try {
       if (isRegister) {
-        await register(name, email, password);
+        await register(name, username, email, password);
       } else {
-        await login(email, password);
+        await login(username, password);
       }
       navigate("/");
     } catch (err) {
@@ -45,7 +46,7 @@ const Login = () => {
         <p className="text-sm text-text-muted dark:text-dark-text-muted mb-8 text-center">
           {isRegister
             ? "Register as a new staff member"
-            : "Sign in with your email and password"}
+            : "Sign in with your username and password"}
         </p>
 
         {error && (
@@ -57,38 +58,46 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegister && (
             <div>
-              <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">
-                Full Name
-              </label>
+              <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">Full Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-2.5 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Enter your name"
+                placeholder="Enter your full name"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full px-4 py-2.5 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Enter your email"
+              placeholder="Enter your username"
             />
           </div>
 
+          {isRegister && (
+            <div>
+              <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 rounded-lg border border-border dark:border-dark-border bg-white dark:bg-dark-surface text-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Enter your email"
+              />
+            </div>
+          )}
+
           <div>
-            <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-text dark:text-dark-text mb-1">Password</label>
             <input
               type="password"
               value={password}
@@ -111,10 +120,7 @@ const Login = () => {
 
         <div className="mt-6 text-center">
           <button
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError("");
-            }}
+            onClick={() => { setIsRegister(!isRegister); setError(""); }}
             className="text-sm text-primary hover:text-primary-hover transition-colors"
           >
             {isRegister
@@ -122,10 +128,6 @@ const Login = () => {
               : "Don't have an account? Register"}
           </button>
         </div>
-
-        <p className="text-xs text-text-muted dark:text-dark-text-muted mt-6 text-center">
-          New staff accounts require owner approval before access is granted.
-        </p>
       </div>
     </div>
   );

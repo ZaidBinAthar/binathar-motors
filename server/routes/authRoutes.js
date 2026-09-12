@@ -10,7 +10,7 @@ const SALT_ROUNDS = 10;
 
 const generateToken = (user) => {
     return jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
+        { id: user.id, username: user.username, email: user.email, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
     );
@@ -19,28 +19,41 @@ const generateToken = (user) => {
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, username, email, password } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ success: false, message: "Name, email and password are required" });
+        if (!name || !username || !email || !password) {
+            return res.status(400).json({ success: false, message: "Name, username, email and password are required" });
         }
 
         if (password.length < 6) {
             return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
         }
 
-        const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-        if (existing.rows.length > 0) {
+        if (username.length < 3) {
+            return res.status(400).json({ success: false, message: "Username must be at least 3 characters" });
+        }
+
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            return res.status(400).json({ success: false, message: "Username can only contain letters, numbers and underscores" });
+        }
+
+        const existingEmail = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+        if (existingEmail.rows.length > 0) {
             return res.status(409).json({ success: false, message: "An account with this email already exists" });
+        }
+
+        const existingUser = await pool.query("SELECT id FROM users WHERE username = $1", [username]);
+        if (existingUser.rows.length > 0) {
+            return res.status(409).json({ success: false, message: "This username is already taken" });
         }
 
         const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
 
         const result = await pool.query(
-            `INSERT INTO users (name, email, password_hash, role, status)
-             VALUES ($1, $2, $3, 'user', 'active')
-             RETURNING id, name, email, role, status`,
-            [name, email, password_hash]
+            `INSERT INTO users (name, username, email, password_hash, role, status)
+             VALUES ($1, $2, $3, $4, 'user', 'active')
+             RETURNING id, name, username, email, role, status`,
+            [name, username, email, password_hash]
         );
 
         const user = result.rows[0];
@@ -55,15 +68,15 @@ router.post("/register", async (req, res) => {
 // POST /api/auth/login
 router.post("/login", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: "Email and password are required" });
+        if (!username || !password) {
+            return res.status(400).json({ success: false, message: "Username and password are required" });
         }
 
-        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        const result = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
         if (result.rows.length === 0) {
-            return res.status(401).json({ success: false, message: "Invalid email or password" });
+            return res.status(401).json({ success: false, message: "Invalid username or password" });
         }
 
         const user = result.rows[0];
@@ -78,7 +91,7 @@ router.post("/login", async (req, res) => {
 
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
-            return res.status(401).json({ success: false, message: "Invalid email or password" });
+            return res.status(401).json({ success: false, message: "Invalid username or password" });
         }
 
         await pool.query("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1", [user.id]);
@@ -87,7 +100,7 @@ router.post("/login", async (req, res) => {
         res.json({
             success: true,
             token,
-            user: { id: user.id, name: user.name, email: user.email, role: user.role, status: user.status }
+            user: { id: user.id, name: user.name, username: user.username, email: user.email, role: user.role, status: user.status }
         });
     } catch (error) {
         console.error("Login error:", error);
@@ -138,29 +151,38 @@ router.put("/change-password", requireAuth, async (req, res) => {
 // POST /api/auth/users (owner only — create user)
 router.post("/users", requireAuth, requireRole("owner"), async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, username, email, password, role } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ success: false, message: "Name, email and password are required" });
+        if (!name || !username || !email || !password) {
+            return res.status(400).json({ success: false, message: "Name, username, email and password are required" });
         }
 
         if (password.length < 6) {
             return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
         }
 
-        const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-        if (existing.rows.length > 0) {
+        if (username.length < 3 || !/^[a-zA-Z0-9_]+$/.test(username)) {
+            return res.status(400).json({ success: false, message: "Username must be at least 3 characters (letters, numbers, underscores only)" });
+        }
+
+        const existingEmail = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+        if (existingEmail.rows.length > 0) {
             return res.status(409).json({ success: false, message: "An account with this email already exists" });
+        }
+
+        const existingUser = await pool.query("SELECT id FROM users WHERE username = $1", [username]);
+        if (existingUser.rows.length > 0) {
+            return res.status(409).json({ success: false, message: "This username is already taken" });
         }
 
         const hash = await bcrypt.hash(password, SALT_ROUNDS);
         const userRole = ["owner", "admin", "staff", "user"].includes(role) ? role : "staff";
 
         const result = await pool.query(
-            `INSERT INTO users (name, email, password_hash, role, status)
-             VALUES ($1, $2, $3, $4, 'active')
-             RETURNING id, name, email, role, status, created_at`,
-            [name, email, hash, userRole]
+            `INSERT INTO users (name, username, email, password_hash, role, status)
+             VALUES ($1, $2, $3, $4, $5, 'active')
+             RETURNING id, name, username, email, role, status, created_at`,
+            [name, username, email, hash, userRole]
         );
 
         res.status(201).json({ success: true, user: result.rows[0] });
@@ -174,7 +196,7 @@ router.post("/users", requireAuth, requireRole("owner"), async (req, res) => {
 router.get("/users", requireAuth, requireRole("owner"), async (req, res) => {
     try {
         const result = await pool.query(
-            "SELECT id, name, email, role, status, last_login, created_at FROM users ORDER BY created_at DESC"
+            "SELECT id, name, username, email, role, status, last_login, created_at FROM users ORDER BY created_at DESC"
         );
         res.json({ success: true, users: result.rows });
     } catch (error) {

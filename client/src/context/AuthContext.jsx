@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
+  const login = async (username, password) => {
+    const { data } = await api.post("/auth/login", { username, password });
 
     if (data.success) {
       localStorage.setItem("token", data.token);
@@ -30,8 +30,8 @@ export const AuthProvider = ({ children }) => {
     throw new Error(data.message);
   };
 
-  const register = async (name, email, password) => {
-    const { data } = await api.post("/auth/register", { name, email, password });
+  const register = async (name, username, email, password) => {
+    const { data } = await api.post("/auth/register", { name, username, email, password });
 
     if (data.success) {
       localStorage.setItem("token", data.token);
