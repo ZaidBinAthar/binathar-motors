@@ -135,6 +135,41 @@ router.put("/change-password", requireAuth, async (req, res) => {
     }
 });
 
+// POST /api/auth/users (owner only — create user)
+router.post("/users", requireAuth, requireRole("owner"), async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({ success: false, message: "Name, email and password are required" });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+        }
+
+        const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+        if (existing.rows.length > 0) {
+            return res.status(409).json({ success: false, message: "An account with this email already exists" });
+        }
+
+        const hash = await bcrypt.hash(password, SALT_ROUNDS);
+        const userRole = ["owner", "admin", "staff", "user"].includes(role) ? role : "staff";
+
+        const result = await pool.query(
+            `INSERT INTO users (name, email, password_hash, role, status)
+             VALUES ($1, $2, $3, $4, 'active')
+             RETURNING id, name, email, role, status, created_at`,
+            [name, email, hash, userRole]
+        );
+
+        res.status(201).json({ success: true, user: result.rows[0] });
+    } catch (error) {
+        console.error("Create user error:", error);
+        res.status(500).json({ success: false, message: "Failed to create user" });
+    }
+});
+
 // GET /api/auth/users (owner only)
 router.get("/users", requireAuth, requireRole("owner"), async (req, res) => {
     try {

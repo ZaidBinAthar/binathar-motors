@@ -107,20 +107,24 @@ router.post("/:id/messages", requireAuth, requireRole("owner", "admin"), async (
 
         const result = await pool.query(
             `INSERT INTO inquiry_messages (inquiry_id, sender, message)
-             VALUES ($1, 'admin', $2)
+             VALUES ($1, $2, $3)
              RETURNING *`,
-            [id, message.trim()]
+            [id, "admin", message.trim()]
         );
 
-        await pool.query(
-            "UPDATE inquiries SET updated_at = CURRENT_TIMESTAMP, status = 'replied' WHERE id = $1",
-            [id]
-        );
+        try {
+            await pool.query(
+                "UPDATE inquiries SET updated_at = CURRENT_TIMESTAMP, status = 'replied' WHERE id = $1",
+                [id]
+            );
+        } catch (updateErr) {
+            console.error("Update inquiry status error:", updateErr);
+        }
 
         res.status(201).json({ success: true, msg: result.rows[0] });
     } catch (error) {
-        console.error("Send message error:", error);
-        res.status(500).json({ success: false, message: "Failed to send message" });
+        console.error("Send message error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to send message: " + error.message });
     }
 });
 
