@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaSearch, FaSlidersH } from "react-icons/fa";
 import api from "../api/axios";
 import BikeCard from "../components/BikeCard";
+import ScrollReveal from "../components/ScrollReveal";
 
 const BikeCatalog = () => {
   const [bikes, setBikes] = useState([]);
@@ -121,8 +122,10 @@ const BikeCatalog = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((bike) => (
-            <BikeCard key={bike.id} bike={bike} />
+          {filtered.map((bike, i) => (
+            <ScrollReveal key={bike.id} delay={i * 60}>
+              <BikeCard bike={bike} />
+            </ScrollReveal>
           ))}
         </div>
       )}
