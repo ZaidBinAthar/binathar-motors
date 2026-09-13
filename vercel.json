@@ -6,10 +6,11 @@
   "builds": [
     {
       "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["client/dist/**", "server/uploads/**"]
-      }
+      "use": "@vercel/node"
+    },
+    {
+      "src": "client/dist/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -22,12 +23,16 @@
       "dest": "/api/index.js"
     },
     {
-      "src": "/(.*?)\\.(.+)",
-      "dest": "/api/index.js"
+      "src": "/(.*?)\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)",
+      "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
+    },
+    {
+      "src": "/((?!api/|uploads/).*)",
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/index.html"
     }
   ]
 }
