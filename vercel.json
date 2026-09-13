@@ -3,6 +3,7 @@
   "env": {
     "VITE_API_URL": "/api"
   },
+  "installCommand": "npm install --ignore-scripts",
   "builds": [
     {
       "src": "api/index.js",

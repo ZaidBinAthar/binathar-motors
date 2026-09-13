@@ -4,7 +4,6 @@
   "type": "module",
   "scripts": {
     "build": "cd client && npm install && npm run build",
-    "postinstall": "cd client && npm install && VITE_API_URL=/api npm run build",
     "start": "node server/server.js"
   },
   "dependencies": {
