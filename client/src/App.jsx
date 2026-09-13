@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import PageTransition from "./components/PageTransition";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import BikeCatalog from "./pages/BikeCatalog";
@@ -21,45 +22,47 @@ const App = () => {
         <AuthProvider>
           <Navbar />
           <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/bikes" element={<BikeCatalog />} />
-              <Route path="/bikes/:id" element={<BikeDetail />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/users"
-                element={
-                  <ProtectedRoute ownerOnly>
-                    <Users />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/inquiries"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <Inquiries />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/inquiries/:id"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <Chat />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
+            <PageTransition>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/bikes" element={<BikeCatalog />} />
+                <Route path="/bikes/:id" element={<BikeDetail />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute ownerOnly>
+                      <Users />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/inquiries"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <Inquiries />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/inquiries/:id"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <Chat />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </PageTransition>
           </main>
           <Footer />
         </AuthProvider>
