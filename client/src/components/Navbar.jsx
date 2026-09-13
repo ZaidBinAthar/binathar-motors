@@ -16,6 +16,7 @@ import {
 } from "react-icons/hi";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -59,6 +60,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 no-underline">
+            <Logo size={28} />
             <span className="text-xl font-bold text-primary">BinAthar</span>
             <span className="text-xl font-semibold text-text-heading dark:text-dark-text-heading">Motors</span>
           </Link>

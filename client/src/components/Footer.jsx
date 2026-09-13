@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import Logo from "./Logo";
 
 const Footer = () => {
   return (
@@ -8,7 +9,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="text-lg font-bold mb-2">
+            <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+              <Logo size={22} />
               <span className="text-primary">BinAthar</span>{" "}
               <span className="text-text-heading dark:text-dark-text-heading">Motors</span>
             </h3>

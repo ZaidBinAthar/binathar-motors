@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Logo from "../components/Logo";
 
 const Login = () => {
   const { user, login, register } = useAuth();
@@ -40,6 +41,11 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-[80vh] px-4">
       <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border p-10 w-full max-w-md">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <Logo size={32} />
+          <span className="text-xl font-bold text-primary">BinAthar</span>
+          <span className="text-xl font-semibold text-text-heading dark:text-dark-text-heading">Motors</span>
+        </div>
         <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading mb-2 text-center">
           {isRegister ? "Create Account" : "Welcome Back"}
         </h1>

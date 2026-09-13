@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FaMotorcycle, FaShieldAlt, FaHandshake, FaStar } from "react-icons/fa";
 import api from "../api/axios";
 import BikeCard from "../components/BikeCard";
+import Logo from "../components/Logo";
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
@@ -39,8 +40,8 @@ const Home = () => {
               Find Your Perfect{" "}
               <span className="text-primary">Ride</span>
             </h1>
-            <p className="text-lg text-gray-300 mb-8">
-              BinAthar Motors — your trusted motorcycle dealer. Browse our collection of quality bikes at the best prices.
+            <p className="text-lg text-gray-300 mb-8 flex items-center gap-2">
+              <Logo size={28} /> BinAthar Motors — your trusted motorcycle dealer. Browse our collection of quality bikes at the best prices.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link

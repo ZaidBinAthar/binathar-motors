@@ -1,12 +1,13 @@
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaWhatsapp } from "react-icons/fa";
+import Logo from "../components/Logo";
 
 const About = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero */}
       <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-text-heading dark:text-dark-text-heading mb-4">
-          About BinAthar Motors
+        <h1 className="text-3xl md:text-4xl font-bold text-text-heading dark:text-dark-text-heading mb-4 flex items-center justify-center gap-3">
+          <Logo size={36} /> About BinAthar Motors
         </h1>
         <p className="text-text-muted dark:text-dark-text-muted max-w-2xl mx-auto leading-relaxed">
           BinAthar Motors is your trusted motorcycle dealer in Faisalabad. We offer a wide range
