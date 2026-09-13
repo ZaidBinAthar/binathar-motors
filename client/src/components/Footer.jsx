@@ -75,7 +75,10 @@ const Footer = () => {
               </a>
             </div>
             <p className="text-xs text-text-muted dark:text-dark-text-muted">
-              Narwala Rd, Jinnah Colony, Faisalabad
+              BinAthar Motors, Narwala Rd, Jinnah Colony, Faisalabad
+            </p>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted mt-0.5">
+              Plus Code: C3C9+VW
             </p>
             <p className="text-xs text-text-muted dark:text-dark-text-muted mt-1">
               0324-7614071 / 0325-6232379

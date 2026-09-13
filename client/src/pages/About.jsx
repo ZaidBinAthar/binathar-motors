@@ -59,7 +59,10 @@ const About = () => {
               <div>
                 <p className="text-xs text-text-muted dark:text-dark-text-muted mb-0.5">Location</p>
                 <p className="text-sm font-medium text-text-heading dark:text-dark-text-heading">
-                  Narwala Rd, Jinnah Colony, Faisalabad
+                  BinAthar Motors, Narwala Rd, Jinnah Colony, Faisalabad
+                </p>
+                <p className="text-xs text-text-muted dark:text-dark-text-muted mt-0.5">
+                  Plus Code: C3C9+VW
                 </p>
               </div>
             </div>
@@ -105,7 +108,7 @@ const About = () => {
         {/* Google Map */}
         <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border overflow-hidden">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3401.476!2d73.08!3d31.42!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sJinnah+Colony%2C+Faisalabad!5e0!3m2!1sen!2spk!4v1"
+            src="https://maps.google.com/maps?q=BinAthar+Motors+C3C9+VW+Faisalabad+Pakistan&t=&z=16&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="100%"
             style={{ border: 0, minHeight: "350px" }}
