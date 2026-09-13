@@ -7,42 +7,22 @@ import authRoutes from "../server/routes/authRoutes.js";
 import bikesRoutes from "../server/routes/bikesRoutes.js";
 import inquiryRoutes from "../server/routes/inquiryRoutes.js";
 
-import fs from "fs";
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
-
-const distPath = path.join(__dirname, "../client/dist");
-const staticPath = path.join(__dirname, "../client/dist");
-console.log("distPath:", distPath);
-console.log("distPath exists:", fs.existsSync(distPath));
-if (fs.existsSync(distPath)) {
-    console.log("dist contents:", fs.readdirSync(distPath));
-}
-
-app.use(express.static(staticPath));
+app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 
 app.get("/api/test", async (req, res) => {
     try {
-        const distExists = fs.existsSync(distPath);
-        const distFiles = distExists ? fs.readdirSync(distPath) : [];
-        const assetsPath = path.join(distPath, "assets");
-        const assetsExist = fs.existsSync(assetsPath);
-        const assetsFiles = assetsExist ? fs.readdirSync(assetsPath) : [];
         const result = await pool.query("SELECT NOW()");
         res.json({
             success: true,
             message: "BinAthar Motors API connected!",
-            databaseTime: result.rows[0].now,
-            distPath,
-            distExists,
-            distFiles,
-            assetsFiles
+            databaseTime: result.rows[0].now
         });
     } catch (error) {
         console.error("Database error:", error);
