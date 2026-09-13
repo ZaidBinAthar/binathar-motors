@@ -1,4 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
-  <rect width="40" height="40" rx="10" fill="#0d9488"/>
-  <text x="20" y="27" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="18" fill="white" letter-spacing="-1">BM</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <!-- motorcycle body -->
+  <g filter="url(#glow)" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- front wheel -->
+    <circle cx="10.5" cy="33" r="5.5"/>
+    <!-- rear wheel -->
+    <circle cx="37" cy="33" r="5.5"/>
+    <!-- frame -->
+    <path d="M16 33 L22 18 L30 18 L37 33"/>
+    <!-- seat -->
+    <path d="M22 18 L18 16 L28 16 L30 18"/>
+    <!-- tank -->
+    <path d="M22 18 C23 14 27 14 28 18"/>
+    <!-- handlebars -->
+    <path d="M15 14 L17 18"/>
+    <path d="M13 13 L17 15"/>
+    <!-- exhaust -->
+    <path d="M30 26 L38 30"/>
+    <!-- engine block -->
+    <rect x="22" y="24" width="6" height="4" rx="1"/>
+  </g>
+  <!-- neon accent line -->
+  <line x1="8" y1="40" x2="40" y2="40" stroke="#0d9488" stroke-width="0.8" opacity="0.5"/>
 </svg>
