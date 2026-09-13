@@ -13,7 +13,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
-app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 
 app.get("/api/test", async (req, res) => {
@@ -35,7 +34,7 @@ app.use("/api/bikes", bikesRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 
 app.use((req, res) => {
-    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+    res.status(404).json({ success: false, message: "Route not found" });
 });
 
 app.use((err, req, res, next) => {
