@@ -6,6 +6,7 @@ import pool from "./db/index.js";
 import authRoutes from "./routes/authRoutes.js";
 import bikesRoutes from "./routes/bikesRoutes.js";
 import inquiryRoutes from "./routes/inquiryRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -43,6 +44,7 @@ app.use("/api/bikes", bikesRoutes);
 
 // Inquiry routes
 app.use("/api/inquiries", inquiryRoutes);
+app.use("/api/reports", reportRoutes);
 
 // 404 handler
 app.use("/api", (req, res) => {

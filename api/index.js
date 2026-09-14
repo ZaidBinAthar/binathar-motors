@@ -6,6 +6,7 @@ import pool from "../server/db/index.js";
 import authRoutes from "../server/routes/authRoutes.js";
 import bikesRoutes from "../server/routes/bikesRoutes.js";
 import inquiryRoutes from "../server/routes/inquiryRoutes.js";
+import reportRoutes from "../server/routes/reportRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -33,6 +34,7 @@ app.get("/api/test", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/bikes", bikesRoutes);
 app.use("/api/inquiries", inquiryRoutes);
+app.use("/api/reports", reportRoutes);
 
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, "../client/dist/index.html"));

@@ -14,6 +14,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Inquiries from "./pages/admin/Inquiries";
 import Chat from "./pages/admin/Chat";
+import Reports from "./pages/admin/Reports";
 
 const App = () => {
   return (
@@ -58,6 +59,14 @@ const App = () => {
                   element={
                     <ProtectedRoute adminOnly>
                       <Chat />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/reports"
+                  element={
+                    <ProtectedRoute ownerOnly>
+                      <Reports />
                     </ProtectedRoute>
                   }
                 />

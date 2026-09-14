@@ -13,6 +13,7 @@ import {
   HiChatAlt2,
   HiLogout,
   HiKey,
+  HiChartBar,
 } from "react-icons/hi";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -51,6 +52,7 @@ const Navbar = () => {
     { to: "/admin", icon: HiCog, label: "Dashboard" },
     { to: "/admin/inquiries", icon: HiChatAlt2, label: "Inquiries" },
     ...(isOwner ? [{ to: "/admin/users", icon: HiUsers, label: "Users" }] : []),
+    ...(isOwner ? [{ to: "/admin/reports", icon: HiChartBar, label: "Reports" }] : []),
   ];
 
   const isActive = (path) => location.pathname === path;
