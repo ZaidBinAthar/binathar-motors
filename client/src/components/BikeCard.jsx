@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { FaGasPump, FaMapMarkerAlt, FaWhatsapp } from "react-icons/fa";
-
-const WHATSAPP_NUMBER = "923247614071";
+import { FaGasPump, FaMapMarkerAlt, FaWhatsapp, FaPhone } from "react-icons/fa";
+import { CONTACT } from "../config/contact";
 
 const getWhatsAppUrl = (bike) => {
   const msg = `Assalamualaikum, I am interested in the ${bike.brand} ${bike.model}, Model ${bike.model_year}, listed at Rs. ${Number(bike.selling_price).toLocaleString()} on BinAthar Motors. Is this bike available?`;
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(msg)}`;
 };
 
 const BikeCard = ({ bike }) => {
@@ -84,17 +83,25 @@ const BikeCard = ({ bike }) => {
           </span>
         </div>
 
-        {/* WhatsApp button */}
+        {/* Action buttons */}
         {bike.status === "available" && (
-          <a
-            href={getWhatsAppUrl(bike)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="mt-3 flex items-center justify-center gap-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg no-underline transition-colors"
-          >
-            <FaWhatsapp size={15} /> Chat on WhatsApp
-          </a>
+          <div className="flex gap-2 mt-3">
+            <a
+              href={`tel:${CONTACT.phone}`}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg no-underline transition-colors"
+            >
+              <FaPhone size={12} /> Call Now
+            </a>
+            <a
+              href={getWhatsAppUrl(bike)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg no-underline transition-colors"
+            >
+              <FaWhatsapp size={14} /> WhatsApp
+            </a>
+          </div>
         )}
       </div>
     </div>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp } from "react-icons/fa";
+import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone } from "react-icons/fa";
 import api from "../api/axios";
 import { useWhatsApp } from "../context/WhatsAppContext";
+import { CONTACT } from "../config/contact";
 import { BikeDetailSkeleton } from "../components/Skeleton";
 
 const BikeDetail = () => {
@@ -183,16 +184,24 @@ const BikeDetail = () => {
             </div>
           )}
 
-          {/* WhatsApp + Inquiry */}
+          {/* Call Now + WhatsApp */}
           {bike.status === "available" && (
-            <a
-              href={`https://wa.me/923247614071?text=${encodeURIComponent(`Assalamualaikum, I am interested in the ${bike.brand} ${bike.model}, Model ${bike.model_year}, listed at Rs. ${Number(bike.selling_price).toLocaleString()} on BinAthar Motors. Is this bike available?`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl no-underline transition-colors mb-4"
-            >
-              <FaWhatsapp size={18} /> Chat on WhatsApp
-            </a>
+            <div className="flex gap-3 mb-4">
+              <a
+                href={`tel:${CONTACT.phone}`}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl no-underline transition-colors"
+              >
+                <FaPhone size={16} /> Call Now
+              </a>
+              <a
+                href={`https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(`Assalamualaikum, I am interested in the ${bike.brand} ${bike.model}, Model ${bike.model_year}, listed at Rs. ${Number(bike.selling_price).toLocaleString()} on BinAthar Motors. Is this bike available?`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl no-underline transition-colors"
+              >
+                <FaWhatsapp size={18} /> WhatsApp
+              </a>
+            </div>
           )}
 
           {/* Inquiry form */}

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { FaWhatsapp, FaTimes } from "react-icons/fa";
 import { useWhatsApp } from "../context/WhatsAppContext";
-
-const WHATSAPP_NUMBER = "923247614071";
+import { CONTACT } from "../config/contact";
 
 const WhatsAppButton = () => {
   const [open, setOpen] = useState(false);
@@ -15,7 +14,7 @@ const WhatsAppButton = () => {
     return "Assalamualaikum, I would like to inquire about your motorcycles on BinAthar Motors.";
   };
 
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(getMessage())}`;
+  const url = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(getMessage())}`;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import Logo from "./Logo";
+import { CONTACT } from "../config/contact";
 
 const Footer = () => {
   return (
@@ -67,7 +68,7 @@ const Footer = () => {
                 <FaInstagram size={18} />
               </a>
               <a
-                href="https://wa.me/923247614071"
+                href={`https://wa.me/${CONTACT.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-border dark:bg-dark-border flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 transition-colors"
