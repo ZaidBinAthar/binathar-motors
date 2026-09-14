@@ -87,9 +87,11 @@ const BikeDetail = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-text-muted dark:text-dark-text-muted">
-                {bike.brand?.[0]}
-              </div>
+              <img
+                src="/no-image.svg"
+                alt="No image available"
+                className="w-full h-full object-cover opacity-60"
+              />
             )}
           </div>
           {allImages.length > 1 && (

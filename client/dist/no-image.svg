@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#f1f5f9"/>
+  <g opacity="0.2" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- motorcycle silhouette -->
+    <circle cx="120" cy="200" r="30"/>
+    <circle cx="280" cy="200" r="30"/>
+    <path d="M150 200 L190 120 L240 120 L280 200"/>
+    <path d="M190 120 L175 100 L230 100 L240 120"/>
+    <path d="M190 120 C195 105 215 105 220 120"/>
+    <path d="M140 90 L155 110"/>
+    <path d="M130 85 L155 95"/>
+    <path d="M240 160 L285 185"/>
+    <rect x="195" y="155" width="30" height="15" rx="3"/>
+  </g>
+  <text x="200" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#94a3b8">No image available</text>
+</svg>

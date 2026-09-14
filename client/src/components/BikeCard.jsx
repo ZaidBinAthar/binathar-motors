@@ -16,9 +16,11 @@ const BikeCard = ({ bike }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-text-muted dark:text-dark-text-muted text-4xl font-bold">
-            {bike.brand?.[0]}
-          </div>
+          <img
+            src="/no-image.svg"
+            alt="No image available"
+            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-300"
+          />
         )}
         <span
           className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full ${
