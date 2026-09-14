@@ -10,6 +10,7 @@ import BikeCatalog from "./pages/BikeCatalog";
 import BikeDetail from "./pages/BikeDetail";
 import About from "./pages/About";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/admin/Dashboard";
 import Users from "./pages/admin/Users";
 import Inquiries from "./pages/admin/Inquiries";
@@ -30,6 +31,7 @@ const App = () => {
                 <Route path="/bikes/:id" element={<BikeDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route
                   path="/admin"
                   element={

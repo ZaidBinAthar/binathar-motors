@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import pool from "../db/index.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 import { requireRole } from "../middleware/roleMiddleware.js";
@@ -298,6 +299,42 @@ router.delete("/users/:id", requireAuth, requireRole("owner"), async (req, res) 
     } catch (error) {
         console.error("Delete user error:", error);
         res.status(500).json({ success: false, message: "Failed to delete user" });
+    }
+});
+
+// POST /api/auth/forgot-password
+router.post("/forgot-password", async (req, res) => {
+    try {
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).json({ success: false, message: "Username or email is required" });
+        }
+
+        const result = await pool.query(
+            "SELECT id, name, username, email FROM users WHERE username = $1 OR email = $1",
+            [username]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "No account found with that username or email" });
+        }
+
+        const user = result.rows[0];
+        const tempPassword = "Reset" + crypto.randomBytes(4).toString("hex");
+        const hash = await bcrypt.hash(tempPassword, SALT_ROUNDS);
+
+        await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hash, user.id]);
+
+        res.json({
+            success: true,
+            message: "Password has been reset",
+            tempPassword,
+            user: { name: user.name, username: user.username }
+        });
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({ success: false, message: "Password reset failed" });
     }
 });
 

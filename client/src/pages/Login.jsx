@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Logo from "../components/Logo";
 
@@ -123,6 +123,14 @@ const Login = () => {
             {loading ? "Please wait..." : isRegister ? "Register" : "Sign In"}
           </button>
         </form>
+
+        {!isRegister && (
+          <div className="mt-3 text-center">
+            <Link to="/forgot-password" className="text-sm text-primary hover:text-primary-hover transition-colors no-underline">
+              Forgot Password?
+            </Link>
+          </div>
+        )}
 
         <div className="mt-6 text-center">
           <button
