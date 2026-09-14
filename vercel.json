@@ -3,18 +3,7 @@
   "env": {
     "VITE_API_URL": "/api"
   },
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "client/dist/**",
-          "server/uploads/**"
-        ]
-      }
-    }
-  ],
+  "outputDirectory": "client/dist",
   "routes": [
     {
       "src": "/api/(.*)",
@@ -25,12 +14,11 @@
       "dest": "/api/index.js"
     },
     {
-      "src": "/(.*?)\\.(.+)",
-      "dest": "/api/index.js"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/index.html"
     }
   ]
 }
