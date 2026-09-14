@@ -38,16 +38,67 @@ app.use("/api/reports", reportRoutes);
 
 const distPath = path.join(__dirname, "../client/dist");
 const indexHtml = fs.existsSync(path.join(distPath, "index.html"))
-    ? fs.readFileSync(path.join(distPath, "index.html"))
+    ? fs.readFileSync(path.join(distPath, "index.html"), "utf-8")
     : null;
 
+const SITE_URL = "https://binathar-motors.vercel.app";
+
+const defaultMeta = {
+    title: "BinAthar Motors – Premium Used Motorcycles",
+    description: "Buy and sell quality used motorcycles at BinAthar Motors. Browse our inventory of Honda, Yamaha, Suzuki and more.",
+    image: `${SITE_URL}/logo.svg`,
+    url: SITE_URL,
+};
+
 app.use((req, res) => {
-    if (indexHtml) {
-        res.setHeader("Content-Type", "text/html");
-        res.send(indexHtml);
-    } else {
-        res.status(404).json({ success: false, message: "Not found" });
+    if (!indexHtml) {
+        return res.status(404).json({ success: false, message: "Not found" });
     }
+
+    const bikeMatch = req.path.match(/^\/bikes\/(\d+)$/);
+
+    if (bikeMatch) {
+        const bikeId = parseInt(bikeMatch[1], 10);
+        pool.query(
+            "SELECT brand, model, model_year, selling_price, cover_image, description FROM bikes WHERE id = $1",
+            [bikeId]
+        )
+            .then(({ rows }) => {
+                if (rows.length === 0) {
+                    res.setHeader("Content-Type", "text/html");
+                    return res.send(indexHtml);
+                }
+
+                const bike = rows[0];
+                const title = `${bike.brand} ${bike.model} ${bike.model_year} – Rs. ${Number(bike.selling_price).toLocaleString()} | BinAthar Motors`;
+                const description = bike.description || `Buy ${bike.brand} ${bike.model} ${bike.model_year} for Rs. ${Number(bike.selling_price).toLocaleString()} at BinAthar Motors.`;
+                const image = bike.cover_image || defaultMeta.image;
+                const url = `${SITE_URL}/bikes/${bikeId}`;
+
+                const metaTags = `
+    <meta property="og:title" content="${title.replace(/"/g, "&quot;")}" />
+    <meta property="og:description" content="${description.replace(/"/g, "&quot;").replace(/\n/g, " ").slice(0, 200)}" />
+    <meta property="og:image" content="${image}" />
+    <meta property="og:url" content="${url}" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title.replace(/"/g, "&quot;")}" />
+    <meta name="twitter:description" content="${description.replace(/"/g, "&quot;").replace(/\n/g, " ").slice(0, 200)}" />
+    <meta name="twitter:image" content="${image}" />`;
+
+                const html = indexHtml.replace("</head>", `${metaTags}\n</head>`);
+                res.setHeader("Content-Type", "text/html");
+                res.send(html);
+            })
+            .catch(() => {
+                res.setHeader("Content-Type", "text/html");
+                res.send(indexHtml);
+            });
+        return;
+    }
+
+    res.setHeader("Content-Type", "text/html");
+    res.send(indexHtml);
 });
 
 app.use((err, req, res, next) => {

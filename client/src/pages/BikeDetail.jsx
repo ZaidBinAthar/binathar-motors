@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone } from "react-icons/fa";
+import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone, FaShareAlt, FaCheck } from "react-icons/fa";
 import api from "../api/axios";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { CONTACT } from "../config/contact";
@@ -16,7 +16,34 @@ const BikeDetail = () => {
   const [inquirySent, setInquirySent] = useState(false);
   const [inquiryError, setInquiryError] = useState("");
   const [inquiryLoading, setInquiryLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { setBike: setWhatsAppBike } = useWhatsApp();
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/bikes/${id}`;
+    const title = bike ? `${bike.brand} ${bike.model} ${bike.model_year} – Rs. ${Number(bike.selling_price).toLocaleString()}` : "BinAthar Motors";
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    }
+  };
 
   useEffect(() => {
     api
@@ -76,12 +103,20 @@ const BikeDetail = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <Link
-        to="/bikes"
-        className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-dark-text-muted hover:text-primary no-underline mb-6"
-      >
-        <FaArrowLeft /> Back to catalog
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          to="/bikes"
+          className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-dark-text-muted hover:text-primary no-underline"
+        >
+          <FaArrowLeft /> Back to catalog
+        </Link>
+        <button
+          onClick={handleShare}
+          className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-dark-text-muted hover:text-primary transition-colors"
+        >
+          {copied ? <><FaCheck size={14} className="text-green-500" /> <span className="text-green-500">Link copied!</span></> : <><FaShareAlt size={14} /> Share</>}
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Images */}
