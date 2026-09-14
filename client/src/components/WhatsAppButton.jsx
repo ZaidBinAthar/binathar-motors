@@ -10,14 +10,12 @@ const WhatsAppButton = () => {
 
   const getMessage = () => {
     if (bike) {
-      return encodeURIComponent(
-        `Hi BinAthar Motors! I'm interested in the ${bike.brand} ${bike.model} (${bike.model_year}) listed for Rs. ${Number(bike.selling_price).toLocaleString()}. Is it still available?`
-      );
+      return `Assalamualaikum, I am interested in the ${bike.brand} ${bike.model}, Model ${bike.model_year}, listed at Rs. ${Number(bike.selling_price).toLocaleString()} on BinAthar Motors. Is this bike available?`;
     }
-    return encodeURIComponent("Hi BinAthar Motors! I'd like to inquire about your motorcycles.");
+    return "Assalamualaikum, I would like to inquire about your motorcycles on BinAthar Motors.";
   };
 
-  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${getMessage()}`;
+  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(getMessage())}`;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
@@ -41,10 +39,10 @@ const WhatsAppButton = () => {
             </button>
           </div>
           <div className="bg-surface-alt dark:bg-dark-surface rounded-lg p-3 mb-3">
-            <p className="text-xs text-text dark:text-dark-text">
+            <p className="text-xs text-text dark:text-dark-text leading-relaxed">
               {bike
-                ? `Hi! I'm interested in the ${bike.brand} ${bike.model}. Is it available?`
-                : "Hi! I'd like to know about your motorcycles."}
+                ? `Assalamualaikum, I am interested in the ${bike.brand} ${bike.model}, Model ${bike.model_year}. Is this bike available?`
+                : "Assalamualaikum, I would like to inquire about your motorcycles."}
             </p>
           </div>
           <a

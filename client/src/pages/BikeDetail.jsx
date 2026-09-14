@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle } from "react-icons/fa";
+import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp } from "react-icons/fa";
 import api from "../api/axios";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { BikeDetailSkeleton } from "../components/Skeleton";
@@ -181,6 +181,18 @@ const BikeDetail = () => {
                 {bike.description}
               </p>
             </div>
+          )}
+
+          {/* WhatsApp + Inquiry */}
+          {bike.status === "available" && (
+            <a
+              href={`https://wa.me/923247614071?text=${encodeURIComponent(`Assalamualaikum, I am interested in the ${bike.brand} ${bike.model}, Model ${bike.model_year}, listed at Rs. ${Number(bike.selling_price).toLocaleString()} on BinAthar Motors. Is this bike available?`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl no-underline transition-colors mb-4"
+            >
+              <FaWhatsapp size={18} /> Chat on WhatsApp
+            </a>
           )}
 
           {/* Inquiry form */}
