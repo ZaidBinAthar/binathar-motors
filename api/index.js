@@ -8,6 +8,7 @@ import authRoutes from "../server/routes/authRoutes.js";
 import bikesRoutes from "../server/routes/bikesRoutes.js";
 import inquiryRoutes from "../server/routes/inquiryRoutes.js";
 import reportRoutes from "../server/routes/reportRoutes.js";
+import salesRoutes from "../server/routes/salesRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/bikes", bikesRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/sales", salesRoutes);
 
 const distPath = path.join(__dirname, "../client/dist");
 const indexHtml = fs.existsSync(path.join(distPath, "index.html"))

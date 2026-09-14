@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
+import MarkSoldModal from "./MarkSoldModal";
+import SaleReceipt from "../../components/SaleReceipt";
 
 const Dashboard = () => {
   const [bikes, setBikes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [soldBike, setSoldBike] = useState(null);
+  const [receiptData, setReceiptData] = useState(null);
   const { isOwner } = useAuth();
 
   const load = () => {
@@ -47,6 +51,12 @@ const Dashboard = () => {
   const handleSaved = () => {
     setShowForm(false);
     setEditing(null);
+    load();
+  };
+
+  const handleSaleRecorded = (sale, bike) => {
+    setSoldBike(null);
+    setReceiptData({ sale, bike });
     load();
   };
 
@@ -93,7 +103,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Form modal */}
+      {/* Bike Form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
@@ -104,6 +114,24 @@ const Dashboard = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* Mark as Sold modal */}
+      {soldBike && (
+        <MarkSoldModal
+          bike={soldBike}
+          onClose={() => setSoldBike(null)}
+          onSaleRecorded={handleSaleRecorded}
+        />
+      )}
+
+      {/* Sale Receipt modal */}
+      {receiptData && (
+        <SaleReceipt
+          sale={receiptData.sale}
+          bike={receiptData.bike}
+          onClose={() => setReceiptData(null)}
+        />
       )}
 
       {/* Table */}
@@ -160,13 +188,24 @@ const Dashboard = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
+                        {bike.status === "available" && (
+                          <button
+                            onClick={() => setSoldBike(bike)}
+                            className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-text-muted hover:text-green-600 transition-colors"
+                            title="Mark as Sold"
+                          >
+                            <FaMoneyBill size={14} />
+                          </button>
+                        )}
                         <button onClick={() => handleEdit(bike)} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Edit">
                           <FaEdit size={14} />
                         </button>
-                        <button onClick={() => handleDelete(bike.id, bike.brand, bike.model)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors" title="Delete">
-                          <FaTrash size={14} />
-                        </button>
+                        {isOwner && (
+                          <button onClick={() => handleDelete(bike.id, bike.brand, bike.model)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors" title="Delete">
+                            <FaTrash size={14} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
