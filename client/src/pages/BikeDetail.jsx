@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle } from "react-icons/fa";
 import api from "../api/axios";
+import { useWhatsApp } from "../context/WhatsAppContext";
+import { BikeDetailSkeleton } from "../components/Skeleton";
 
 const BikeDetail = () => {
   const { id } = useParams();
@@ -13,6 +15,7 @@ const BikeDetail = () => {
   const [inquirySent, setInquirySent] = useState(false);
   const [inquiryError, setInquiryError] = useState("");
   const [inquiryLoading, setInquiryLoading] = useState(false);
+  const { setBike: setWhatsAppBike } = useWhatsApp();
 
   useEffect(() => {
     api
@@ -20,9 +23,12 @@ const BikeDetail = () => {
       .then((res) => {
         setBike(res.data.bike);
         setImages(res.data.images || []);
+        setWhatsAppBike(res.data.bike);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    return () => setWhatsAppBike(null);
   }, [id]);
 
   const handleInquiry = async (e) => {
@@ -48,8 +54,8 @@ const BikeDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <BikeDetailSkeleton />
       </div>
     );
   }

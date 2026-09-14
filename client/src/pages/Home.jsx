@@ -5,15 +5,18 @@ import api from "../api/axios";
 import BikeCard from "../components/BikeCard";
 import Logo from "../components/Logo";
 import ScrollReveal from "../components/ScrollReveal";
+import { BikeCardSkeleton } from "../components/Skeleton";
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api
       .get("/bikes")
       .then((res) => setFeatured(res.data.bikes?.slice(0, 6) || []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const features = [
@@ -89,7 +92,7 @@ const Home = () => {
       </section>
 
       {/* Featured Bikes */}
-      {featured.length > 0 && (
+      {(loading || featured.length > 0) && (
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
@@ -103,11 +106,13 @@ const Home = () => {
               </div>
             </ScrollReveal>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featured.map((bike, i) => (
-                <ScrollReveal key={bike.id} delay={i * 80}>
-                  <BikeCard bike={bike} />
-                </ScrollReveal>
-              ))}
+              {loading
+                ? [...Array(6)].map((_, i) => <BikeCardSkeleton key={i} />)
+                : featured.map((bike, i) => (
+                    <ScrollReveal key={bike.id} delay={i * 80}>
+                      <BikeCard bike={bike} />
+                    </ScrollReveal>
+                  ))}
             </div>
             <ScrollReveal>
               <div className="text-center mt-8">

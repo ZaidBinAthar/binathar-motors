@@ -3,6 +3,7 @@ import { FaSearch, FaSlidersH } from "react-icons/fa";
 import api from "../api/axios";
 import BikeCard from "../components/BikeCard";
 import ScrollReveal from "../components/ScrollReveal";
+import { BikeCardSkeleton } from "../components/Skeleton";
 
 const BikeCatalog = () => {
   const [bikes, setBikes] = useState([]);
@@ -110,8 +111,8 @@ const BikeCatalog = () => {
 
       {/* Grid */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => <BikeCardSkeleton key={i} />)}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20">

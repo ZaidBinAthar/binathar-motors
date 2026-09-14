@@ -64,3 +64,13 @@ body {
 .animate-page-in {
   animation: pageIn 0.3s ease-out;
 }
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}

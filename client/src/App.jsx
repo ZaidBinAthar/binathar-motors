@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { WhatsAppProvider } from "./context/WhatsAppContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import PageTransition from "./components/PageTransition";
+import WhatsAppButton from "./components/WhatsAppButton";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import BikeCatalog from "./pages/BikeCatalog";
@@ -22,10 +24,11 @@ const App = () => {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <Navbar />
-          <main className="flex-1">
-            <PageTransition>
-              <Routes>
+          <WhatsAppProvider>
+            <Navbar />
+            <main className="flex-1">
+              <PageTransition>
+                <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/bikes" element={<BikeCatalog />} />
                 <Route path="/bikes/:id" element={<BikeDetail />} />
@@ -76,6 +79,8 @@ const App = () => {
             </PageTransition>
           </main>
           <Footer />
+          <WhatsAppButton />
+          </WhatsAppProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
