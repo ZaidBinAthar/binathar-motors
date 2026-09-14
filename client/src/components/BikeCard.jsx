@@ -16,11 +16,19 @@ const BikeCard = ({ bike }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <img
-            src="/no-image.svg"
-            alt="No image available"
-            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-300"
-          />
+          <div className="relative w-full h-full">
+            <img
+              src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&q=60"
+              alt="No image available"
+              className="w-full h-full object-cover grayscale opacity-50 group-hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="bg-black/50 rounded-lg px-4 py-2 text-center">
+                <p className="text-white text-sm font-semibold">No Image</p>
+                <p className="text-white/60 text-xs">Available</p>
+              </div>
+            </div>
+          </div>
         )}
         <span
           className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full ${

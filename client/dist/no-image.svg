@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
-  <rect width="400" height="300" fill="#f1f5f9"/>
-  <g opacity="0.2" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <!-- motorcycle silhouette -->
-    <circle cx="120" cy="200" r="30"/>
-    <circle cx="280" cy="200" r="30"/>
-    <path d="M150 200 L190 120 L240 120 L280 200"/>
-    <path d="M190 120 L175 100 L230 100 L240 120"/>
-    <path d="M190 120 C195 105 215 105 220 120"/>
-    <path d="M140 90 L155 110"/>
-    <path d="M130 85 L155 95"/>
-    <path d="M240 160 L285 185"/>
-    <rect x="195" y="155" width="30" height="15" rx="3"/>
-  </g>
-  <text x="200" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#94a3b8">No image available</text>
+  <rect width="400" height="300" fill="#e2e8f0"/>
+  <image href="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&q=60" x="0" y="0" width="400" height="300" preserveAspectRatio="xMidYMid slice" filter="url(#grey)"/>
+  <defs>
+    <filter id="grey">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect x="120" y="120" width="160" height="60" rx="8" fill="rgba(0,0,0,0.5)"/>
+  <text x="200" y="148" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="white" font-weight="600">No Image</text>
+  <text x="200" y="166" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="rgba(255,255,255,0.7)">Available</text>
 </svg>

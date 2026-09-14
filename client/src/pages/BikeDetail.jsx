@@ -87,11 +87,19 @@ const BikeDetail = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <img
-                src="/no-image.svg"
-                alt="No image available"
-                className="w-full h-full object-cover opacity-60"
-              />
+              <div className="relative w-full h-full">
+                <img
+                  src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&q=60"
+                  alt="No image available"
+                  className="w-full h-full object-cover grayscale opacity-50"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="bg-black/50 rounded-lg px-5 py-3 text-center">
+                    <p className="text-white text-base font-semibold">No Image</p>
+                    <p className="text-white/60 text-sm">Available</p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
           {allImages.length > 1 && (
