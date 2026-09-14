@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { FaImage, FaTrash, FaStar } from "react-icons/fa";
+import { FaImage, FaTrash, FaStar, FaMagic, FaRedo } from "react-icons/fa";
 import api from "../../api/axios";
 
 const BikeForm = ({ bike, onSaved, onCancel }) => {
@@ -15,15 +15,30 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
     status: bike?.status || "available",
     description: bike?.description || "",
   });
+
+  // Extra fields for description generation (not saved to DB, only used for AI)
+  const [extra, setExtra] = useState({
+    mileage: "",
+    new_parts: "",
+    features: "",
+    notes: "",
+  });
+
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [existingImages, setExistingImages] = useState(bike?.images || []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [showExtra, setShowExtra] = useState(false);
   const fileRef = useRef(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleExtraChange = (e) => {
+    setExtra({ ...extra, [e.target.name]: e.target.value });
   };
 
   const handleFiles = (e) => {
@@ -39,20 +54,20 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-const uploadImages = async (bikeId) => {
+  const uploadImages = async (bikeId) => {
     if (files.length === 0) return;
     const fd = new FormData();
     files.forEach((f) => fd.append("images", f));
     const res = await api.post(`/bikes/${bikeId}/images`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
+      headers: { "Content-Type": "multipart/form-data" },
     });
     if (res.data.images && res.data.images.length > 0) {
-        const firstNew = res.data.images[0];
-        if (!firstNew.is_cover) {
-            await api.put(`/bikes/${bikeId}/images/${firstNew.id}/cover`);
-        }
+      const firstNew = res.data.images[0];
+      if (!firstNew.is_cover) {
+        await api.put(`/bikes/${bikeId}/images/${firstNew.id}/cover`);
+      }
     }
-};
+  };
 
   const deleteExistingImage = async (imageId) => {
     try {
@@ -74,6 +89,31 @@ const uploadImages = async (bikeId) => {
     }
   };
 
+  const generateDescription = async () => {
+    setGenerating(true);
+    try {
+      const res = await api.post("/ai/generate-description", {
+        brand: form.brand,
+        model: form.model,
+        model_year: form.model_year,
+        selling_price: form.selling_price,
+        condition: form.condition,
+        engine_cc: form.engine_cc,
+        color: form.color,
+        registration_city: form.registration_city,
+        mileage: extra.mileage,
+        new_parts: extra.new_parts,
+        features: extra.features,
+        notes: extra.notes,
+      });
+      setForm({ ...form, description: res.data.description });
+    } catch {
+      setError("Failed to generate description. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -89,7 +129,7 @@ const uploadImages = async (bikeId) => {
 
       let bikeId;
       if (bike) {
-        const res = await api.put(`/bikes/${bike.id}`, payload);
+        await api.put(`/bikes/${bike.id}`, payload);
         bikeId = bike.id;
       } else {
         const res = await api.post("/bikes", payload);
@@ -177,9 +217,100 @@ const uploadImages = async (bikeId) => {
         </div>
       </div>
 
+      {/* Description with AI Generator */}
       <div>
         <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Description</label>
-        <textarea name="description" rows={3} value={form.description} onChange={handleChange} className={`${inputClass} resize-none`} />
+        <textarea
+          name="description"
+          rows={4}
+          value={form.description}
+          onChange={handleChange}
+          placeholder="Write or generate a description for this bike..."
+          className={`${inputClass} resize-none`}
+        />
+
+        {/* AI Generate Button Row */}
+        <div className="flex items-center gap-2 mt-2">
+          <button
+            type="button"
+            onClick={generateDescription}
+            disabled={generating || !form.brand}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+          >
+            {generating ? (
+              <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <FaMagic size={11} />
+            )}
+            {generating ? "Generating..." : "Generate Description"}
+          </button>
+          {form.description && (
+            <button
+              type="button"
+              onClick={generateDescription}
+              disabled={generating}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-text-muted dark:text-dark-text-muted hover:text-primary text-xs font-medium rounded-lg transition-colors"
+            >
+              <FaRedo size={10} /> Regenerate
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowExtra(!showExtra)}
+            className="ml-auto text-xs text-text-muted dark:text-dark-text-muted hover:text-primary transition-colors"
+          >
+            {showExtra ? "Hide" : "More options"}
+          </button>
+        </div>
+
+        {/* Extra fields for better description generation */}
+        {showExtra && (
+          <div className="mt-3 p-3 bg-surface-alt dark:bg-dark-surface rounded-lg border border-border dark:border-dark-border space-y-3 animate-page-in">
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">
+              Fill in below for a better generated description. These fields are only used for description generation.
+            </p>
+            <div>
+              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Mileage / Odometer</label>
+              <input
+                name="mileage"
+                value={extra.mileage}
+                onChange={handleExtraChange}
+                placeholder="e.g. 15,000 km"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">New Parts / Repairs</label>
+              <input
+                name="new_parts"
+                value={extra.new_parts}
+                onChange={handleExtraChange}
+                placeholder="e.g. New tyres, battery replaced"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Special Features</label>
+              <input
+                name="features"
+                value={extra.features}
+                onChange={handleExtraChange}
+                placeholder="e.g. Original paint, first owner"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Other Notes</label>
+              <input
+                name="notes"
+                value={extra.notes}
+                onChange={handleExtraChange}
+                placeholder="Any additional details"
+                className={inputClass}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Image Upload */}
