@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 import pool from "../server/db/index.js";
 import authRoutes from "../server/routes/authRoutes.js";
 import bikesRoutes from "../server/routes/bikesRoutes.js";
@@ -14,7 +15,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
-app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use("/uploads", express.static(path.join(__dirname, "../server/uploads")));
 
 app.get("/api/test", async (req, res) => {
@@ -36,8 +36,18 @@ app.use("/api/bikes", bikesRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/reports", reportRoutes);
 
+const distPath = path.join(__dirname, "../client/dist");
+const indexHtml = fs.existsSync(path.join(distPath, "index.html"))
+    ? fs.readFileSync(path.join(distPath, "index.html"))
+    : null;
+
 app.use((req, res) => {
-    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+    if (indexHtml) {
+        res.setHeader("Content-Type", "text/html");
+        res.send(indexHtml);
+    } else {
+        res.status(404).json({ success: false, message: "Not found" });
+    }
 });
 
 app.use((err, req, res, next) => {
