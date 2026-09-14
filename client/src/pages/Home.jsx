@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaMotorcycle, FaShieldAlt, FaHandshake, FaStar } from "react-icons/fa";
+import { FaMotorcycle, FaShieldAlt, FaHandshake, FaStar, FaPen } from "react-icons/fa";
 import api from "../api/axios";
 import BikeCard from "../components/BikeCard";
 import Logo from "../components/Logo";
 import ScrollReveal from "../components/ScrollReveal";
 import { BikeCardSkeleton } from "../components/Skeleton";
+import ReviewCard from "../components/ReviewCard";
+import RatingSummary from "../components/RatingSummary";
+import WriteReview from "../components/WriteReview";
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [reviewSummary, setReviewSummary] = useState(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   useEffect(() => {
     api
@@ -17,6 +23,16 @@ const Home = () => {
       .then((res) => setFeatured(res.data.bikes?.slice(0, 6) || []))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    api
+      .get("/reviews/public", { params: { limit: 6 } })
+      .then((res) => setReviews(res.data.reviews || []))
+      .catch(() => {});
+
+    api
+      .get("/reviews/summary")
+      .then((res) => setReviewSummary(res.data.summary))
+      .catch(() => {});
   }, []);
 
   const features = [
@@ -128,6 +144,76 @@ const Home = () => {
         </section>
       )}
 
+      {/* Customer Reviews */}
+      {reviews.length > 0 && (
+        <section className="py-16 bg-surface-alt dark:bg-dark-surface-alt">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ScrollReveal>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-text-heading dark:text-dark-text-heading mb-1">
+                    What Our Customers Say
+                  </h2>
+                  {reviewSummary && reviewSummary.total_reviews > 0 && (
+                    <p className="text-sm text-text-muted dark:text-dark-text-muted">
+                      <span className="text-yellow-500 font-bold">{reviewSummary.avg_rating}</span>
+                      {" / 5 — Based on "}{reviewSummary.total_reviews}{" review"}{reviewSummary.total_reviews !== 1 ? "s" : ""}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors shrink-0"
+                >
+                  <FaPen size={12} /> Write a Review
+                </button>
+              </div>
+            </ScrollReveal>
+
+            {/* Rating summary */}
+            {reviewSummary && reviewSummary.total_reviews > 0 && (
+              <ScrollReveal>
+                <div className="bg-white dark:bg-dark-surface rounded-xl border border-border dark:border-dark-border p-6 mb-8">
+                  <RatingSummary summary={reviewSummary} />
+                </div>
+              </ScrollReveal>
+            )}
+
+            {/* Reviews grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.slice(0, 6).map((review, i) => (
+                <ScrollReveal key={review.id} delay={i * 80}>
+                  <ReviewCard review={review} />
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* No reviews yet — still show CTA to write one */}
+      {reviews.length === 0 && (
+        <section className="py-16 bg-surface-alt dark:bg-dark-surface-alt">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <ScrollReveal>
+              <FaStar className="text-4xl text-yellow-400 mx-auto mb-4" />
+              <h2 className="text-2xl md:text-3xl font-bold text-text-heading dark:text-dark-text-heading mb-2">
+                What Our Customers Say
+              </h2>
+              <p className="text-text-muted dark:text-dark-text-muted mb-6">
+                Be the first to share your experience with BinAthar Motors!
+              </p>
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors mx-auto"
+              >
+                <FaPen size={12} /> Write a Review
+              </button>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
+
       {/* CTA */}
       <ScrollReveal>
         <section className="py-16 bg-primary">
@@ -147,6 +233,17 @@ const Home = () => {
           </div>
         </section>
       </ScrollReveal>
+
+      {/* Write Review Modal */}
+      {showReviewForm && (
+        <WriteReview
+          onClose={() => setShowReviewForm(false)}
+          onSubmitted={() => {
+            api.get("/reviews/public", { params: { limit: 6 } }).then((res) => setReviews(res.data.reviews || []));
+            api.get("/reviews/summary").then((res) => setReviewSummary(res.data.summary));
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -1,11 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone, FaShareAlt, FaCheck } from "react-icons/fa";
+import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone, FaShareAlt, FaCheck, FaStar, FaPen } from "react-icons/fa";
 import api from "../api/axios";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { CONTACT } from "../config/contact";
 import { BikeDetailSkeleton } from "../components/Skeleton";
 import BikeCard from "../components/BikeCard";
+import ReviewCard from "../components/ReviewCard";
+import RatingSummary from "../components/RatingSummary";
+import WriteReview from "../components/WriteReview";
 
 const BikeDetail = () => {
   const { id } = useParams();
@@ -19,6 +22,9 @@ const BikeDetail = () => {
   const [inquiryLoading, setInquiryLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [allBikes, setAllBikes] = useState([]);
+  const [bikeReviews, setBikeReviews] = useState([]);
+  const [bikeReviewSummary, setBikeReviewSummary] = useState(null);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const { setBike: setWhatsAppBike } = useWhatsApp();
 
   const handleShare = async () => {
@@ -61,6 +67,16 @@ const BikeDetail = () => {
     api
       .get("/bikes")
       .then((res) => setAllBikes(res.data.bikes || []))
+      .catch(() => {});
+
+    api
+      .get("/reviews/public", { params: { bike_id: id } })
+      .then((res) => setBikeReviews(res.data.reviews || []))
+      .catch(() => {});
+
+    api
+      .get("/reviews/summary", { params: { bike_id: id } })
+      .then((res) => setBikeReviewSummary(res.data.summary))
       .catch(() => {});
 
     return () => setWhatsAppBike(null);
@@ -347,6 +363,56 @@ const BikeDetail = () => {
         </div>
       </div>
 
+      {/* Customer Reviews for This Bike */}
+      <div className="mt-16 pt-10 border-t border-border dark:border-dark-border">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading">
+              Customer Reviews
+            </h2>
+            {bikeReviewSummary && bikeReviewSummary.total_reviews > 0 && (
+              <p className="text-sm text-text-muted dark:text-dark-text-muted mt-1">
+                <span className="text-yellow-500 font-bold">{bikeReviewSummary.avg_rating}</span>
+                {" / 5 — Based on "}{bikeReviewSummary.total_reviews}{" review"}{bikeReviewSummary.total_reviews !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => setShowReviewForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors shrink-0"
+          >
+            <FaPen size={12} /> Write a Review
+          </button>
+        </div>
+
+        {bikeReviewSummary && bikeReviewSummary.total_reviews > 0 && (
+          <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-5 mb-6">
+            <RatingSummary summary={bikeReviewSummary} />
+          </div>
+        )}
+
+        {bikeReviews.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {bikeReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-surface-alt dark:bg-dark-surface-alt rounded-xl">
+            <FaStar className="text-3xl text-yellow-400 mx-auto mb-3 opacity-50" />
+            <p className="text-sm text-text-muted dark:text-dark-text-muted mb-3">
+              No reviews yet for this bike
+            </p>
+            <button
+              onClick={() => setShowReviewForm(true)}
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              Be the first to review
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* You May Also Like */}
       {recommended.length > 0 && (
         <div className="mt-16 pt-10 border-t border-border dark:border-dark-border">
@@ -359,6 +425,19 @@ const BikeDetail = () => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Write Review Modal */}
+      {showReviewForm && (
+        <WriteReview
+          bikeId={bike?.id}
+          bikeName={bike ? `${bike.brand} ${bike.model} ${bike.model_year}` : ""}
+          onClose={() => setShowReviewForm(false)}
+          onSubmitted={() => {
+            api.get("/reviews/public", { params: { bike_id: id } }).then((res) => setBikeReviews(res.data.reviews || []));
+            api.get("/reviews/summary", { params: { bike_id: id } }).then((res) => setBikeReviewSummary(res.data.summary));
+          }}
+        />
       )}
     </div>
   );

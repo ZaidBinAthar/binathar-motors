@@ -13,6 +13,7 @@ import {
   HiChatAlt2,
   HiLogout,
   HiKey,
+  HiStar,
   HiChartBar,
 } from "react-icons/hi";
 import { useAuth } from "../context/AuthContext";
@@ -136,6 +137,14 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface-alt no-underline transition-colors"
                       >
                         <HiCog size={16} /> Dashboard
+                      </Link>
+                    )}
+                    {isAdmin && (
+                      <Link
+                        to="/admin/reviews"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface-alt no-underline transition-colors"
+                      >
+                        <HiStar size={16} /> Reviews
                       </Link>
                     )}
                     <Link

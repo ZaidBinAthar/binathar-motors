@@ -18,6 +18,7 @@ import Users from "./pages/admin/Users";
 import Inquiries from "./pages/admin/Inquiries";
 import Chat from "./pages/admin/Chat";
 import Reports from "./pages/admin/Reports";
+import ReviewsManager from "./pages/admin/ReviewsManager";
 
 const App = () => {
   return (
@@ -72,6 +73,14 @@ const App = () => {
                   element={
                     <ProtectedRoute ownerOnly>
                       <Reports />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/reviews"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <ReviewsManager />
                     </ProtectedRoute>
                   }
                 />

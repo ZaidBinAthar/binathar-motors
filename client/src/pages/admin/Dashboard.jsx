@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
@@ -69,6 +69,13 @@ const Dashboard = () => {
           <div>
             <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Inquiries</p>
             <p className="text-xs text-text-muted dark:text-dark-text-muted">Customer messages</p>
+          </div>
+        </Link>
+        <Link to="/admin/reviews" className="flex items-center gap-3 bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4 hover:border-primary/50 transition-colors no-underline">
+          <FaStar className="text-primary" size={20} />
+          <div>
+            <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Reviews</p>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">Customer feedback</p>
           </div>
         </Link>
         {isOwner && (
