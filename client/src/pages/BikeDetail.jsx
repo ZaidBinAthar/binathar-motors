@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone, FaShareAlt, FaCheck, FaStar, FaPen } from "react-icons/fa";
+import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone, FaShareAlt, FaCheck, FaStar, FaPen, FaQrcode } from "react-icons/fa";
 import api from "../api/axios";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { useVisitorBehavior } from "../hooks/useVisitorBehavior";
@@ -10,6 +10,7 @@ import BikeRecommendations from "../components/BikeRecommendations";
 import ReviewCard from "../components/ReviewCard";
 import RatingSummary from "../components/RatingSummary";
 import WriteReview from "../components/WriteReview";
+import QRModal from "../components/QRModal";
 
 const BikeDetail = () => {
   const { id } = useParams();
@@ -25,6 +26,7 @@ const BikeDetail = () => {
   const [bikeReviews, setBikeReviews] = useState([]);
   const [bikeReviewSummary, setBikeReviewSummary] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const { setBike: setWhatsAppBike } = useWhatsApp();
   const { trackView } = useVisitorBehavior();
 
@@ -135,6 +137,12 @@ const BikeDetail = () => {
           className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-dark-text-muted hover:text-primary transition-colors"
         >
           {copied ? <><FaCheck size={14} className="text-green-500" /> <span className="text-green-500">Link copied!</span></> : <><FaShareAlt size={14} /> Share</>}
+        </button>
+        <button
+          onClick={() => setShowQR(true)}
+          className="inline-flex items-center gap-2 text-sm text-text-muted dark:text-dark-text-muted hover:text-primary transition-colors"
+        >
+          <FaQrcode size={14} /> QR Code
         </button>
       </div>
 
@@ -377,6 +385,11 @@ const BikeDetail = () => {
             api.get("/reviews/summary", { params: { bike_id: id } }).then((res) => setBikeReviewSummary(res.data.summary));
           }}
         />
+      )}
+
+      {/* QR Code Modal */}
+      {showQR && bike && (
+        <QRModal bike={bike} onClose={() => setShowQR(false)} />
       )}
     </div>
   );

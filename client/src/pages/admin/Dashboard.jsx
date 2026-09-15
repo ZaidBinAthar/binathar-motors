@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
 import MarkSoldModal from "./MarkSoldModal";
 import SaleReceipt from "../../components/SaleReceipt";
+import QRModal from "../../components/QRModal";
 
 const Dashboard = () => {
   const [bikes, setBikes] = useState([]);
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const [editing, setEditing] = useState(null);
   const [soldBike, setSoldBike] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
+  const [qrBike, setQrBike] = useState(null);
   const { isOwner } = useAuth();
 
   const load = () => {
@@ -141,6 +143,14 @@ const Dashboard = () => {
         />
       )}
 
+      {/* QR Code modal */}
+      {qrBike && (
+        <QRModal
+          bike={qrBike}
+          onClose={() => setQrBike(null)}
+        />
+      )}
+
       {/* Table */}
       {loading ? (
         <div className="flex justify-center py-20">
@@ -205,6 +215,13 @@ const Dashboard = () => {
                             <FaMoneyBill size={14} />
                           </button>
                         )}
+                        <button
+                          onClick={() => setQrBike(bike)}
+                          className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors"
+                          title="QR Code"
+                        >
+                          <FaQrcode size={14} />
+                        </button>
                         <button onClick={() => handleEdit(bike)} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Edit">
                           <FaEdit size={14} />
                         </button>
