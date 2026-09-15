@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode, FaTag, FaCheckSquare, FaSquare, FaPrint } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode, FaTag, FaCheckSquare, FaSquare, FaPrint, FaRobot } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
 import MarkSoldModal from "./MarkSoldModal";
 import SaleReceipt from "../../components/SaleReceipt";
 import { BikeTagModal, printMultiTags } from "../../components/BikeTag";
+import AiAssistant from "../../components/AiAssistant";
 
 const Dashboard = () => {
   const [bikes, setBikes] = useState([]);
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [tagBike, setTagBike] = useState(null);
   const [selectedBikes, setSelectedBikes] = useState([]);
   const [tagMode, setTagMode] = useState(false);
+  const [showAi, setShowAi] = useState(false);
   const { isOwner } = useAuth();
 
   const load = () => {
@@ -87,7 +89,19 @@ const Dashboard = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+        <button
+          onClick={() => setShowAi(true)}
+          className="flex items-center gap-3 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 rounded-xl border border-primary/20 p-4 hover:border-primary/50 transition-colors text-left"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <FaRobot className="text-primary" size={20} />
+          </div>
+          <div>
+            <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Ask BinAthar AI</p>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted">Dealership intelligence</p>
+          </div>
+        </button>
         <Link to="/admin/inquiries" className="flex items-center gap-3 bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4 hover:border-primary/50 transition-colors no-underline">
           <FaComments className="text-primary" size={20} />
           <div>
@@ -184,6 +198,15 @@ const Dashboard = () => {
           bike={tagBike}
           onClose={() => setTagBike(null)}
         />
+      )}
+
+      {/* AI Assistant Panel */}
+      {showAi && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-surface dark:bg-dark-surface rounded-2xl border border-border dark:border-dark-border w-full max-w-lg h-[85vh] flex flex-col overflow-hidden">
+            <AiAssistant onClose={() => setShowAi(false)} />
+          </div>
+        </div>
       )}
 
       {/* Table */}

@@ -12,6 +12,7 @@ import salesRoutes from "../server/routes/salesRoutes.js";
 import aiRoutes from "../server/routes/aiRoutes.js";
 import reviewsRoutes from "../server/routes/reviewsRoutes.js";
 import sellRequestsRoutes from "../server/routes/sellRequestsRoutes.js";
+import aiAssistantRoutes from "../server/routes/aiAssistantRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -43,6 +44,7 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/sell-requests", sellRequestsRoutes);
+app.use("/api/ai-assistant", aiAssistantRoutes);
 
 const distPath = path.join(__dirname, "../client/dist");
 const indexHtml = fs.existsSync(path.join(distPath, "index.html"))
