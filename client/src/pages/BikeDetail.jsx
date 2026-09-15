@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaArrowLeft, FaGasPump, FaMapMarkerAlt, FaCalendarAlt, FaPalette, FaInfoCircle, FaWhatsapp, FaPhone, FaShareAlt, FaCheck, FaStar, FaPen } from "react-icons/fa";
 import api from "../api/axios";
 import { useWhatsApp } from "../context/WhatsAppContext";
+import { useVisitorBehavior } from "../hooks/useVisitorBehavior";
 import { CONTACT } from "../config/contact";
 import { BikeDetailSkeleton } from "../components/Skeleton";
-import BikeCard from "../components/BikeCard";
+import BikeRecommendations from "../components/BikeRecommendations";
 import ReviewCard from "../components/ReviewCard";
 import RatingSummary from "../components/RatingSummary";
 import WriteReview from "../components/WriteReview";
@@ -21,11 +22,11 @@ const BikeDetail = () => {
   const [inquiryError, setInquiryError] = useState("");
   const [inquiryLoading, setInquiryLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [allBikes, setAllBikes] = useState([]);
   const [bikeReviews, setBikeReviews] = useState([]);
   const [bikeReviewSummary, setBikeReviewSummary] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const { setBike: setWhatsAppBike } = useWhatsApp();
+  const { trackView } = useVisitorBehavior();
 
   const handleShare = async () => {
     const url = `${window.location.origin}/bikes/${id}`;
@@ -60,14 +61,10 @@ const BikeDetail = () => {
         setBike(res.data.bike);
         setImages(res.data.images || []);
         setWhatsAppBike(res.data.bike);
+        trackView(res.data.bike);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-
-    api
-      .get("/bikes")
-      .then((res) => setAllBikes(res.data.bikes || []))
-      .catch(() => {});
 
     api
       .get("/reviews/public", { params: { bike_id: id } })
@@ -81,55 +78,6 @@ const BikeDetail = () => {
 
     return () => setWhatsAppBike(null);
   }, [id]);
-
-  const recommended = useMemo(() => {
-    if (!bike || allBikes.length === 0) return [];
-
-    const scoreBike = (other) => {
-      if (other.id === bike.id) return -1;
-
-      let score = 0;
-
-      // Same brand: +30
-      if (other.brand === bike.brand) score += 30;
-
-      // Same model name (partial match): +20
-      if (other.model && bike.model) {
-        const otherWords = other.model.toLowerCase().split(/\s+/);
-        const bikeWords = bike.model.toLowerCase().split(/\s+/);
-        const sharedWords = otherWords.filter((w) => bikeWords.includes(w) && w.length > 2);
-        score += sharedWords.length * 10;
-      }
-
-      // Same engine CC: +15
-      if (other.engine_cc && bike.engine_cc && other.engine_cc === bike.engine_cc) score += 15;
-
-      // Similar price (within 20%): +10
-      if (other.selling_price && bike.selling_price) {
-        const diff = Math.abs(other.selling_price - bike.selling_price) / bike.selling_price;
-        if (diff <= 0.1) score += 10;
-        else if (diff <= 0.2) score += 6;
-        else if (diff <= 0.3) score += 3;
-      }
-
-      // Same year: +8
-      if (other.model_year && bike.model_year && other.model_year === bike.model_year) score += 8;
-
-      // Similar year (±1): +4
-      if (other.model_year && bike.model_year && Math.abs(other.model_year - bike.model_year) === 1) score += 4;
-
-      // Available bikes get a bonus
-      if (other.status === "available") score += 15;
-
-      return score;
-    };
-
-    return allBikes
-      .map((b) => ({ ...b, _score: scoreBike(b) }))
-      .filter((b) => b._score > 0)
-      .sort((a, b) => b._score - a._score)
-      .slice(0, 6);
-  }, [bike, allBikes]);
 
   const handleInquiry = async (e) => {
     e.preventDefault();
@@ -413,18 +361,9 @@ const BikeDetail = () => {
         )}
       </div>
 
-      {/* You May Also Like */}
-      {recommended.length > 0 && (
-        <div className="mt-16 pt-10 border-t border-border dark:border-dark-border">
-          <h2 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading mb-6">
-            You May Also Like
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommended.map((b) => (
-              <BikeCard key={b.id} bike={b} />
-            ))}
-          </div>
-        </div>
+      {/* Smart Recommendations */}
+      {bike && (
+        <BikeRecommendations currentBike={bike} />
       )}
 
       {/* Write Review Modal */}
