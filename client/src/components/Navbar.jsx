@@ -216,6 +216,15 @@ const Navbar = () => {
 
             <hr className="border-border dark:border-dark-border" />
 
+            <button
+              onClick={() => { toggle(); setOpen(false); }}
+              className="flex items-center gap-3 w-full text-left py-2.5 text-sm font-medium text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface-alt rounded-lg px-3 transition-colors"
+            >
+              {dark ? <HiSun size={18} /> : <HiMoon size={18} />} {dark ? "Light Mode" : "Dark Mode"}
+            </button>
+
+            <hr className="border-border dark:border-dark-border" />
+
             {user ? (
               <>
                 <div className="flex items-center gap-3 px-3 py-2">
