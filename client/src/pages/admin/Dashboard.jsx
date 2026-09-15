@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode, FaTag, FaCheckSquare, FaSquare, FaPrint } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
 import MarkSoldModal from "./MarkSoldModal";
 import SaleReceipt from "../../components/SaleReceipt";
-import QRModal from "../../components/QRModal";
+import { BikeTagModal, printMultiTags } from "../../components/BikeTag";
 
 const Dashboard = () => {
   const [bikes, setBikes] = useState([]);
@@ -15,7 +15,9 @@ const Dashboard = () => {
   const [editing, setEditing] = useState(null);
   const [soldBike, setSoldBike] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
-  const [qrBike, setQrBike] = useState(null);
+  const [tagBike, setTagBike] = useState(null);
+  const [selectedBikes, setSelectedBikes] = useState([]);
+  const [tagMode, setTagMode] = useState(false);
   const { isOwner } = useAuth();
 
   const load = () => {
@@ -62,6 +64,26 @@ const Dashboard = () => {
     load();
   };
 
+  const toggleSelect = (id) => {
+    setSelectedBikes((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedBikes.length === bikes.length) {
+      setSelectedBikes([]);
+    } else {
+      setSelectedBikes(bikes.map((b) => b.id));
+    }
+  };
+
+  const handlePrintSelected = () => {
+    const selected = bikes.filter((b) => selectedBikes.includes(b.id));
+    if (selected.length === 0) return;
+    printMultiTags(selected);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Quick links */}
@@ -71,13 +93,6 @@ const Dashboard = () => {
           <div>
             <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Inquiries</p>
             <p className="text-xs text-text-muted dark:text-dark-text-muted">Customer messages</p>
-          </div>
-        </Link>
-        <Link to="/admin/reviews" className="flex items-center gap-3 bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4 hover:border-primary/50 transition-colors no-underline">
-          <FaStar className="text-primary" size={20} />
-          <div>
-            <p className="font-semibold text-text-heading dark:text-dark-text-heading text-sm">Reviews</p>
-            <p className="text-xs text-text-muted dark:text-dark-text-muted">Customer feedback</p>
           </div>
         </Link>
         {isOwner && (
@@ -104,12 +119,32 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading">Bike Inventory</h1>
           <p className="text-sm text-text-muted dark:text-dark-text-muted">{bikes.length} bike{bikes.length !== 1 ? "s" : ""}</p>
         </div>
-        <button
-          onClick={() => { setEditing(null); setShowForm(true); }}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
-        >
-          <FaPlus size={14} /> Add Bike
-        </button>
+        <div className="flex items-center gap-2">
+          {tagMode && selectedBikes.length > 0 && (
+            <button
+              onClick={handlePrintSelected}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+            >
+              <FaPrint size={14} /> Print {selectedBikes.length} Tag{selectedBikes.length !== 1 ? "s" : ""}
+            </button>
+          )}
+          <button
+            onClick={() => { setTagMode(!tagMode); setSelectedBikes([]); }}
+            className={`flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors ${
+              tagMode
+                ? "bg-primary text-white"
+                : "border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-surface-alt dark:hover:bg-dark-surface-alt"
+            }`}
+          >
+            <FaTag size={14} /> {tagMode ? "Exit Tag Mode" : "Generate Tags"}
+          </button>
+          <button
+            onClick={() => { setEditing(null); setShowForm(true); }}
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+          >
+            <FaPlus size={14} /> Add Bike
+          </button>
+        </div>
       </div>
 
       {/* Bike Form modal */}
@@ -143,11 +178,11 @@ const Dashboard = () => {
         />
       )}
 
-      {/* QR Code modal */}
-      {qrBike && (
-        <QRModal
-          bike={qrBike}
-          onClose={() => setQrBike(null)}
+      {/* Bike Tag modal */}
+      {tagBike && (
+        <BikeTagModal
+          bike={tagBike}
+          onClose={() => setTagBike(null)}
         />
       )}
 
@@ -167,6 +202,13 @@ const Dashboard = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border dark:border-dark-border">
+                  {tagMode && (
+                    <th className="px-4 py-3">
+                      <button onClick={toggleSelectAll} className="text-text-muted hover:text-primary">
+                        {selectedBikes.length === bikes.length ? <FaCheckSquare size={16} /> : <FaSquare size={16} />}
+                      </button>
+                    </th>
+                  )}
                   <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Image</th>
                   <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Bike</th>
                   <th className="text-left px-4 py-3 font-medium text-text-muted dark:text-dark-text-muted">Year</th>
@@ -178,7 +220,14 @@ const Dashboard = () => {
               </thead>
               <tbody>
                 {bikes.map((bike) => (
-                  <tr key={bike.id} className="border-b border-border dark:border-dark-border last:border-0 hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors">
+                  <tr key={bike.id} className={`border-b border-border dark:border-dark-border last:border-0 hover:bg-surface-alt dark:hover:bg-dark-surface transition-colors ${selectedBikes.includes(bike.id) ? "bg-primary/5 dark:bg-primary/10" : ""}`}>
+                    {tagMode && (
+                      <td className="px-4 py-3">
+                        <button onClick={() => toggleSelect(bike.id)} className="text-text-muted hover:text-primary">
+                          {selectedBikes.includes(bike.id) ? <FaCheckSquare size={16} className="text-primary" /> : <FaSquare size={16} />}
+                        </button>
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       {bike.cover_image ? (
                         <img src={bike.cover_image} alt="" className="w-10 h-10 rounded object-cover" />
@@ -206,7 +255,7 @@ const Dashboard = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        {bike.status === "available" && (
+                        {bike.status === "available" && !tagMode && (
                           <button
                             onClick={() => setSoldBike(bike)}
                             className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-text-muted hover:text-green-600 transition-colors"
@@ -215,20 +264,24 @@ const Dashboard = () => {
                             <FaMoneyBill size={14} />
                           </button>
                         )}
-                        <button
-                          onClick={() => setQrBike(bike)}
-                          className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors"
-                          title="QR Code"
-                        >
-                          <FaQrcode size={14} />
-                        </button>
-                        <button onClick={() => handleEdit(bike)} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Edit">
-                          <FaEdit size={14} />
-                        </button>
-                        {isOwner && (
-                          <button onClick={() => handleDelete(bike.id, bike.brand, bike.model)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors" title="Delete">
-                            <FaTrash size={14} />
-                          </button>
+                        {!tagMode && (
+                          <>
+                            <button
+                              onClick={() => setTagBike(bike)}
+                              className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors"
+                              title="Bike Tag"
+                            >
+                              <FaTag size={14} />
+                            </button>
+                            <button onClick={() => handleEdit(bike)} className="p-2 rounded-lg hover:bg-surface-alt dark:hover:bg-dark-surface text-text-muted hover:text-primary transition-colors" title="Edit">
+                              <FaEdit size={14} />
+                            </button>
+                            {isOwner && (
+                              <button onClick={() => handleDelete(bike.id, bike.brand, bike.model)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-text-muted hover:text-red-500 transition-colors" title="Delete">
+                                <FaTrash size={14} />
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </td>
