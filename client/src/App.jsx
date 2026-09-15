@@ -20,6 +20,8 @@ import Inquiries from "./pages/admin/Inquiries";
 import Chat from "./pages/admin/Chat";
 import Reports from "./pages/admin/Reports";
 import ReviewsManager from "./pages/admin/ReviewsManager";
+import SellYourBike from "./pages/SellYourBike";
+import SellRequests from "./pages/admin/SellRequests";
 
 const App = () => {
   return (
@@ -36,6 +38,7 @@ const App = () => {
                 <Route path="/bikes/:id" element={<BikeDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/find-my-bike" element={<FindMyBikePage />} />
+                <Route path="/sell-your-bike" element={<SellYourBike />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route
@@ -83,6 +86,14 @@ const App = () => {
                   element={
                     <ProtectedRoute adminOnly>
                       <ReviewsManager />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/sell-requests"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <SellRequests />
                     </ProtectedRoute>
                   }
                 />

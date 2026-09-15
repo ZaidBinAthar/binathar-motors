@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaMotorcycle, FaShieldAlt, FaHandshake, FaStar, FaPen, FaSearch } from "react-icons/fa";
+import { FaMotorcycle, FaShieldAlt, FaHandshake, FaStar, FaPen, FaSearch, FaTag } from "react-icons/fa";
 import api from "../api/axios";
 import BikeCard from "../components/BikeCard";
 import Logo from "../components/Logo";
@@ -125,6 +125,29 @@ const Home = () => {
                 className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg no-underline transition-colors"
               >
                 Start Finding My Bike →
+              </Link>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Sell Your Bike */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="bg-gradient-to-br from-green-500/5 to-green-500/10 dark:from-green-500/10 dark:to-green-500/5 rounded-2xl border border-green-500/20 p-8 md:p-12 text-center">
+              <FaTag className="text-green-500 text-4xl mx-auto mb-4" />
+              <h2 className="text-2xl md:text-3xl font-bold text-text-heading dark:text-dark-text-heading mb-2">
+                Want to Sell Your Bike?
+              </h2>
+              <p className="text-text-muted dark:text-dark-text-muted mb-6 max-w-lg mx-auto">
+                Have a motorcycle you want to sell? Sell it to BinAthar Motors hassle-free. Get a fair price and instant payment.
+              </p>
+              <Link
+                to="/sell-your-bike"
+                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-lg no-underline transition-colors"
+              >
+                Sell Your Bike →
               </Link>
             </div>
           </ScrollReveal>

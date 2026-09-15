@@ -15,6 +15,7 @@ import {
   HiKey,
   HiStar,
   HiChartBar,
+  HiTag,
 } from "react-icons/hi";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -46,12 +47,14 @@ const Navbar = () => {
   const navItems = [
     { to: "/", icon: HiHome, label: "Home" },
     { to: "/bikes", icon: HiCollection, label: "Bikes" },
+    { to: "/sell-your-bike", icon: HiTag, label: "Sell Your Bike" },
     { to: "/about", icon: HiInformationCircle, label: "About" },
   ];
 
   const adminItems = [
     { to: "/admin", icon: HiCog, label: "Dashboard" },
     { to: "/admin/inquiries", icon: HiChatAlt2, label: "Inquiries" },
+    { to: "/admin/sell-requests", icon: HiTag, label: "Sell Requests" },
     ...(isOwner ? [{ to: "/admin/users", icon: HiUsers, label: "Users" }] : []),
     ...(isOwner ? [{ to: "/admin/reports", icon: HiChartBar, label: "Reports" }] : []),
   ];

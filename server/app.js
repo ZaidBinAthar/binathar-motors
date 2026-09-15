@@ -10,6 +10,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import reviewsRoutes from "./routes/reviewsRoutes.js";
+import sellRequestsRoutes from "./routes/sellRequestsRoutes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -51,6 +52,7 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/reviews", reviewsRoutes);
+app.use("/api/sell-requests", sellRequestsRoutes);
 
 // 404 handler
 app.use("/api", (req, res) => {
