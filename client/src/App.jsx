@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import BikeCatalog from "./pages/BikeCatalog";
 import BikeDetail from "./pages/BikeDetail";
 import About from "./pages/About";
+import FindMyBikePage from "./pages/FindMyBikePage";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/admin/Dashboard";
@@ -34,6 +35,7 @@ const App = () => {
                 <Route path="/bikes" element={<BikeCatalog />} />
                 <Route path="/bikes/:id" element={<BikeDetail />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/find-my-bike" element={<FindMyBikePage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route
