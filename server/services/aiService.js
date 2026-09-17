@@ -403,7 +403,7 @@ const INTENTS = [
             response += `- Total: **${inquiries.total}**\n`;
             response += `- New: **${inquiries.new_inquiries}** | Replied: **${inquiries.replied}** | Closed: **${inquiries.closed}**\n\n`;
             response += "**Reviews**\n";
-            response += `- Average rating: **${reviews.avg_rating}/5** (${reviews.total_reviews} reviews)\n\n";
+            response += `- Average rating: **${reviews.avg_rating}/5** (${reviews.total_reviews} reviews)\n\n`;
             if (brands.length > 0) {
                 response += "**Top Brands**\n";
                 response += formatTable(brands.slice(0, 5), [
