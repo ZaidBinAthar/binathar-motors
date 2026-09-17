@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FaMotorcycle, FaCheckCircle, FaPhone, FaEnvelope, FaUser } from "react-icons/fa";
+import { useState, useRef } from "react";
+import { FaMotorcycle, FaCheckCircle, FaPhone, FaEnvelope, FaUser, FaImage, FaTimes } from "react-icons/fa";
 import api from "../api/axios";
 
 const SellYourBike = () => {
@@ -18,6 +18,9 @@ const SellYourBike = () => {
     description: "",
   });
 
+  const [files, setFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
+  const fileRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -26,20 +29,53 @@ const SellYourBike = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleFiles = (e) => {
+    const selected = Array.from(e.target.files);
+    if (files.length + selected.length > 5) {
+      setError("You can upload a maximum of 5 images.");
+      return;
+    }
+    const newFiles = [...files, ...selected].slice(0, 5);
+    setFiles(newFiles);
+    const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
+    setPreviews(newPreviews);
+    setError("");
+  };
+
+  const removeFile = (index) => {
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
+    URL.revokeObjectURL(previews[index]);
+    setPreviews(newFiles.map((f) => URL.createObjectURL(f)));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
 
     try {
-      const payload = {
-        ...form,
-        model_year: Number(form.model_year),
-        expected_price: Number(form.expected_price),
-        engine_cc: form.engine_cc ? Number(form.engine_cc) : undefined,
-      };
+      const formData = new FormData();
+      formData.append("seller_name", form.seller_name);
+      formData.append("seller_phone", form.seller_phone);
+      if (form.seller_email) formData.append("seller_email", form.seller_email);
+      formData.append("brand", form.brand);
+      formData.append("model", form.model);
+      formData.append("model_year", Number(form.model_year));
+      formData.append("expected_price", Number(form.expected_price));
+      if (form.color) formData.append("color", form.color);
+      if (form.engine_cc) formData.append("engine_cc", Number(form.engine_cc));
+      if (form.registration_city) formData.append("registration_city", form.registration_city);
+      formData.append("condition", form.condition);
+      if (form.description) formData.append("description", form.description);
 
-      await api.post("/sell-requests", payload);
+      for (const file of files) {
+        formData.append("images", file);
+      }
+
+      await api.post("/sell-requests", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to submit. Please try again.");
@@ -65,6 +101,8 @@ const SellYourBike = () => {
           <button
             onClick={() => {
               setSuccess(false);
+              setFiles([]);
+              setPreviews([]);
               setForm({
                 seller_name: "",
                 seller_phone: "",
@@ -276,6 +314,57 @@ const SellYourBike = () => {
               className={`${inputClass} resize-none`}
             />
           </div>
+        </div>
+
+        {/* Bike Photos */}
+        <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-6">
+          <h2 className="text-sm font-semibold text-text-heading dark:text-dark-text-heading mb-4 flex items-center gap-2">
+            <FaImage size={14} className="text-primary" /> Bike Photos
+          </h2>
+          <p className="text-xs text-text-muted dark:text-dark-text-muted mb-4">
+            Upload up to 5 photos of your bike. Clear photos help us evaluate your bike faster.
+          </p>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            multiple
+            onChange={handleFiles}
+            className="hidden"
+          />
+
+          {previews.length > 0 && (
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
+              {previews.map((src, i) => (
+                <div key={i} className="relative group">
+                  <img src={src} alt={`Preview ${i + 1}`} className="w-full h-24 object-cover rounded-lg border border-border dark:border-dark-border" />
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <FaTimes size={10} />
+                  </button>
+                  {i === 0 && (
+                    <span className="absolute bottom-1 left-1 bg-primary text-white text-[10px] px-1.5 py-0.5 rounded">Cover</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {files.length < 5 && (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="w-full border-2 border-dashed border-border dark:border-dark-border rounded-lg py-6 text-text-muted dark:text-dark-text-muted hover:border-primary hover:text-primary transition-colors text-sm flex flex-col items-center gap-2"
+            >
+              <FaImage size={20} />
+              <span>Click to upload photos ({files.length}/5)</span>
+              <span className="text-xs text-text-muted dark:text-dark-text-muted">JPEG, PNG, or WebP — Max 5MB each</span>
+            </button>
+          )}
         </div>
 
         {/* Submit */}

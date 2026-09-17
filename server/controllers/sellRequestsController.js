@@ -37,10 +37,12 @@ export const createSellRequest = async (req, res) => {
             } catch {}
         }
 
+        const imageUrls = (req.files || []).map((f) => `/uploads/${f.filename}`);
+
         const result = await pool.query(
             `INSERT INTO sell_requests
-                (seller_name, seller_phone, seller_email, user_id, brand, model, model_year, expected_price, color, engine_cc, registration_city, condition, description)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+                (seller_name, seller_phone, seller_email, user_id, brand, model, model_year, expected_price, color, engine_cc, registration_city, condition, description, bike_images)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
              RETURNING *`,
             [
                 seller_name,
@@ -56,6 +58,7 @@ export const createSellRequest = async (req, res) => {
                 registration_city || null,
                 condition,
                 description || null,
+                imageUrls.length > 0 ? imageUrls : null,
             ]
         );
 
@@ -203,6 +206,18 @@ export const convertToBike = async (req, res) => {
              RETURNING *`,
             [sr.brand, sr.model, sr.model_year, price, sr.color, sr.engine_cc, sr.registration_city, sr.condition, sr.description, req.user.id]
         );
+
+        const newBikeId = bikeResult.rows[0].id;
+
+        if (sr.bike_images && sr.bike_images.length > 0) {
+            for (let i = 0; i < sr.bike_images.length; i++) {
+                await client.query(
+                    `INSERT INTO bike_images (bike_id, image_url, is_cover, sort_order)
+                     VALUES ($1, $2, $3, $4)`,
+                    [newBikeId, sr.bike_images[i], i === 0, i]
+                );
+            }
+        }
 
         await client.query(
             `UPDATE sell_requests

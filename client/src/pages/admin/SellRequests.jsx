@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaClock, FaCheckCircle, FaTimesCircle, FaTrash, FaPhone, FaEnvelope, FaMotorcycle, FaExchangeAlt } from "react-icons/fa";
+import { FaClock, FaCheckCircle, FaTimesCircle, FaTrash, FaPhone, FaEnvelope, FaMotorcycle, FaExchangeAlt, FaImage } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 
@@ -174,6 +174,11 @@ const SellRequests = () => {
                     {sr.registration_city && <span>{sr.registration_city}</span>}
                     <span>Condition: {sr.condition}</span>
                     <span className="font-medium text-primary">Rs. {Number(sr.expected_price).toLocaleString()}</span>
+                    {sr.bike_images && sr.bike_images.length > 0 && (
+                      <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                        <FaImage size={10} /> {sr.bike_images.length} photo{sr.bike_images.length > 1 ? "s" : ""}
+                      </span>
+                    )}
                   </div>
 
                   {/* Seller info */}
@@ -271,6 +276,21 @@ const SellRequests = () => {
                     <div className="mt-3">
                       <span className="text-xs text-text-muted dark:text-dark-text-muted">Description</span>
                       <p className="text-sm text-text dark:text-dark-text mt-1">{sr.description}</p>
+                    </div>
+                  )}
+                  {sr.bike_images && sr.bike_images.length > 0 && (
+                    <div className="mt-3">
+                      <span className="text-xs text-text-muted dark:text-dark-text-muted">Bike Photos ({sr.bike_images.length})</span>
+                      <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                        {sr.bike_images.map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt={`Bike photo ${i + 1}`}
+                            className="h-24 w-24 object-cover rounded-lg border border-border dark:border-dark-border shrink-0"
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
