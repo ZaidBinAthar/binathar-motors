@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   FaMotorcycle,
   FaDollarSign,
   FaChartLine,
   FaComments,
-  FaUsers,
   FaArrowUp,
   FaArrowDown,
   FaExchangeAlt,
+  FaFilter,
+  FaTimes,
 } from "react-icons/fa";
 import api from "../../api/axios";
 
@@ -16,15 +17,46 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const [brands, setBrands] = useState([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [brand, setBrand] = useState("");
+
+  const fetchReports = useCallback(() => {
+    setLoading(true);
+    setError("");
+    const params = {};
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
+    if (brand) params.brand = brand;
+
     api
-      .get("/reports")
+      .get("/reports", { params })
       .then((res) => setData(res.data.data))
       .catch((err) => setError(err.response?.data?.message || "Failed to load reports"))
       .finally(() => setLoading(false));
+  }, [dateFrom, dateTo, brand]);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  useEffect(() => {
+    api.get("/reports/brands").then((res) => setBrands(res.data.brands || [])).catch(() => {});
   }, []);
 
-  if (loading) {
+  const hasFilters = dateFrom || dateTo || brand;
+
+  const clearFilters = () => {
+    setDateFrom("");
+    setDateTo("");
+    setBrand("");
+  };
+
+  const inputClass =
+    "px-3 py-2 rounded-lg border border-border dark:border-dark-border bg-surface dark:bg-dark-surface text-text dark:text-dark-text text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary";
+
+  if (loading && !data) {
     return (
       <div className="flex justify-center py-20">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -32,7 +64,7 @@ const Reports = () => {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl p-6 text-center">
@@ -58,7 +90,6 @@ const Reports = () => {
   };
 
   const maxRevenue = Math.max(...monthlySales.map((m) => Number(m.revenue)), 1);
-  const maxSalesCount = Math.max(...monthlySales.map((m) => Number(m.sales_count)), 1);
 
   const fmt = (n) => new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 0 }).format(n);
 
@@ -75,9 +106,59 @@ const Reports = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading mb-6">
-        Owner Reports
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-text-heading dark:text-dark-text-heading">
+          Owner Reports
+        </h1>
+        {loading && (
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        )}
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-4 mb-8">
+        <div className="flex items-center gap-2 mb-3">
+          <FaFilter size={14} className="text-primary" />
+          <span className="text-sm font-medium text-text-heading dark:text-dark-text-heading">Filters</span>
+        </div>
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Date From</label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Date To</label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Brand</label>
+            <select value={brand} onChange={(e) => setBrand(e.target.value)} className={inputClass}>
+              <option value="">All Brands</option>
+              {brands.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
+          </div>
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              <FaTimes size={12} /> Clear
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
