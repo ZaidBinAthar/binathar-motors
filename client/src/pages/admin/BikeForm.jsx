@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { FaImage, FaTrash, FaStar, FaMagic, FaRedo } from "react-icons/fa";
 import api from "../../api/axios";
+import AutoComplete from "../../components/AutoComplete";
+import { BRANDS, BRAND_MODELS, YEARS, COLORS, ENGINES, CITIES, getModels } from "../../utils/bikeOptions";
 
 const BikeForm = ({ bike, onSaved, onCancel }) => {
   const [form, setForm] = useState({
@@ -35,6 +37,14 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleBrandChange = (brand) => {
+    setForm({ ...form, brand, model: "" });
+  };
+
+  const handleModelChange = (model) => {
+    setForm({ ...form, model });
   };
 
   const handleExtraChange = (e) => {
@@ -162,19 +172,34 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Brand *</label>
-          <input name="brand" value={form.brand} onChange={handleChange} required className={inputClass} />
+          <AutoComplete
+            options={BRANDS}
+            value={form.brand}
+            onChange={handleBrandChange}
+            placeholder="Search brand..."
+            label="Brand *"
+          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Model *</label>
-          <input name="model" value={form.model} onChange={handleChange} required className={inputClass} />
+          <AutoComplete
+            options={getModels(form.brand)}
+            value={form.model}
+            onChange={handleModelChange}
+            placeholder={form.brand ? "Search model..." : "Select brand first"}
+            label="Model *"
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Year *</label>
-          <input name="model_year" type="number" min="1900" max="2030" value={form.model_year} onChange={handleChange} required className={inputClass} />
+          <select name="model_year" value={form.model_year} onChange={handleChange} required className={inputClass}>
+            <option value="">Select Year</option>
+            {YEARS.filter((y) => y >= 1990).map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Price (Rs.) *</label>
@@ -184,18 +209,33 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Color</label>
-          <input name="color" value={form.color} onChange={handleChange} className={inputClass} />
+          <AutoComplete
+            options={COLORS}
+            value={form.color}
+            onChange={(v) => setForm({ ...form, color: v })}
+            placeholder="Search color..."
+            label="Color"
+          />
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Engine (cc)</label>
-          <input name="engine_cc" type="number" min="0" value={form.engine_cc} onChange={handleChange} className={inputClass} />
+          <AutoComplete
+            options={ENGINES.map((e) => `${e}cc`)}
+            value={form.engine_cc ? `${form.engine_cc}cc` : ""}
+            onChange={(v) => setForm({ ...form, engine_cc: Number(v.replace("cc", "")) })}
+            placeholder="Search engine..."
+            label="Engine (cc)"
+          />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Registration City</label>
-        <input name="registration_city" value={form.registration_city} onChange={handleChange} className={inputClass} />
+        <AutoComplete
+          options={CITIES}
+          value={form.registration_city}
+          onChange={(v) => setForm({ ...form, registration_city: v })}
+          placeholder="Search city..."
+          label="Registration City"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

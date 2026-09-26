@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { FaMotorcycle, FaCheckCircle, FaPhone, FaEnvelope, FaUser, FaImage, FaTimes } from "react-icons/fa";
 import api from "../api/axios";
+import AutoComplete from "../components/AutoComplete";
+import { BRANDS, BRAND_MODELS, YEARS, COLORS, ENGINES, CITIES, getModels } from "../utils/bikeOptions";
 
 const SellYourBike = () => {
   const [form, setForm] = useState({
@@ -27,6 +29,14 @@ const SellYourBike = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleBrandChange = (brand) => {
+    setForm({ ...form, brand, model: "" });
+  };
+
+  const handleModelChange = (model) => {
+    setForm({ ...form, model });
   };
 
   const handleFiles = (e) => {
@@ -196,7 +206,7 @@ const SellYourBike = () => {
           </div>
         </div>
 
-        {/* Bike Info */}
+          {/* Bike Info */}
         <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-6">
           <h2 className="text-sm font-semibold text-text-heading dark:text-dark-text-heading mb-4 flex items-center gap-2">
             <FaMotorcycle size={14} className="text-primary" /> Bike Details
@@ -204,25 +214,21 @@ const SellYourBike = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Brand *</label>
-              <input
-                name="brand"
+              <AutoComplete
+                options={BRANDS}
                 value={form.brand}
-                onChange={handleChange}
-                required
-                placeholder="e.g. Honda"
-                className={inputClass}
+                onChange={handleBrandChange}
+                placeholder="Search brand..."
+                label="Brand *"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Model *</label>
-              <input
-                name="model"
+              <AutoComplete
+                options={getModels(form.brand)}
                 value={form.model}
-                onChange={handleChange}
-                required
-                placeholder="e.g. CB 150"
-                className={inputClass}
+                onChange={handleModelChange}
+                placeholder={form.brand ? "Search model..." : "Select brand first"}
+                label="Model *"
               />
             </div>
           </div>
@@ -230,16 +236,18 @@ const SellYourBike = () => {
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Year *</label>
-              <input
+              <select
                 name="model_year"
-                type="number"
-                min="1900"
-                max="2030"
                 value={form.model_year}
                 onChange={handleChange}
                 required
                 className={inputClass}
-              />
+              >
+                <option value="">Select Year</option>
+                {YEARS.filter((y) => y >= 1990).map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Expected Price (Rs.) *</label>
@@ -258,38 +266,33 @@ const SellYourBike = () => {
 
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
-              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Color</label>
-              <input
-                name="color"
+              <AutoComplete
+                options={COLORS}
                 value={form.color}
-                onChange={handleChange}
-                placeholder="e.g. Red"
-                className={inputClass}
+                onChange={(v) => setForm({ ...form, color: v })}
+                placeholder="Search color..."
+                label="Color"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Engine (cc)</label>
-              <input
-                name="engine_cc"
-                type="number"
-                min="0"
-                value={form.engine_cc}
-                onChange={handleChange}
-                placeholder="e.g. 150"
-                className={inputClass}
+              <AutoComplete
+                options={ENGINES.map((e) => `${e}cc`)}
+                value={form.engine_cc ? `${form.engine_cc}cc` : ""}
+                onChange={(v) => setForm({ ...form, engine_cc: Number(v.replace("cc", "")) })}
+                placeholder="Search engine..."
+                label="Engine (cc)"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
-              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Registration City</label>
-              <input
-                name="registration_city"
+              <AutoComplete
+                options={CITIES}
                 value={form.registration_city}
-                onChange={handleChange}
-                placeholder="e.g. Lahore"
-                className={inputClass}
+                onChange={(v) => setForm({ ...form, registration_city: v })}
+                placeholder="Search city..."
+                label="Registration City"
               />
             </div>
             <div>
