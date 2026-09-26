@@ -1,9 +1,5 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import {
     getBikes,
@@ -20,20 +16,14 @@ import {
 import { requireAuth } from "../middleware/authMiddleware.js";
 import { requireRole } from "../middleware/roleMiddleware.js";
 
-const storage = multer.diskStorage({
-    destination: path.join(__dirname, "..", "uploads"),
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-    }
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowed = /jpeg|jpg|png|webp/;
-        const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+        const ext = allowed.test(file.originalname.split(".").pop().toLowerCase());
         const mime = allowed.test(file.mimetype);
         cb(null, ext && mime);
     }

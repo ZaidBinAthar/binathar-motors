@@ -1,8 +1,4 @@
-import fs from "fs";
-import path from "path";
 import pool from "../db/index.js";
-
-const UPLOADS_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), "..", "uploads");
 
 // POST /api/bikes/:id/images
 export const uploadImages = async (req, res) => {
@@ -30,7 +26,9 @@ export const uploadImages = async (req, res) => {
 
         const inserted = [];
         for (const file of req.files) {
-            const imageUrl = `/uploads/${file.filename}`;
+            const base64Data = file.buffer.toString("base64");
+            const mimeType = file.mimetype || "image/jpeg";
+            const imageUrl = `data:${mimeType};base64,${base64Data}`;
             const isCover = sortOrder === 0;
 
             const result = await pool.query(
@@ -62,9 +60,6 @@ export const deleteImage = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Image not found" });
         }
-
-        const imagePath = path.join(UPLOADS_DIR, path.basename(result.rows[0].image_url));
-        fs.unlink(imagePath, () => {});
 
         const remaining = await pool.query(
             "SELECT id FROM bike_images WHERE bike_id = $1 ORDER BY sort_order ASC",
