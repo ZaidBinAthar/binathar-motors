@@ -315,7 +315,7 @@ const Users = () => {
 
 const Modal = ({ onClose, title, children }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-        <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border p-6 w-full max-w-sm">
+        <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-text-heading dark:text-dark-text-heading">{title}</h3>
                 <button onClick={onClose} className="text-text-muted hover:text-text-heading dark:hover:text-dark-text-heading"><FaTimes size={18} /></button>

@@ -303,7 +303,7 @@ const SellRequests = () => {
       {/* Action Modal */}
       {actionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border w-full max-w-md p-6">
+          <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border w-full max-w-lg p-6">
             <h3 className="text-lg font-bold text-text-heading dark:text-dark-text-heading mb-4">
               {actionType === "convert" ? "Accept & Add to Stock" : "Reject Sell Request"}
             </h3>

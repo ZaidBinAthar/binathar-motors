@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode, FaTag, FaCheckSquare, FaSquare, FaPrint, FaRobot } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaMotorcycle, FaUsers, FaComments, FaMoneyBill, FaStar, FaQrcode, FaTag, FaCheckSquare, FaSquare, FaPrint, FaRobot, FaCalculator, FaArrowUp, FaStore } from "react-icons/fa";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import BikeForm from "./BikeForm";
@@ -12,6 +12,7 @@ import AiAssistant from "../../components/AiAssistant";
 const Dashboard = () => {
   const [bikes, setBikes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stockValuation, setStockValuation] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [soldBike, setSoldBike] = useState(null);
@@ -29,6 +30,10 @@ const Dashboard = () => {
       .then((res) => setBikes(res.data.bikes || []))
       .catch(() => {})
       .finally(() => setLoading(false));
+    api
+      .get("/bikes/stock-valuation")
+      .then((res) => setStockValuation(res.data.data))
+      .catch(() => {});
   };
 
   useEffect(() => { load(); }, []);
@@ -127,6 +132,56 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Stock Valuation Cards */}
+      {stockValuation && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <FaStore className="text-blue-600 dark:text-blue-400" size={20} />
+              </div>
+              <div>
+                <p className="text-xs text-text-muted dark:text-dark-text-muted">Total Stock Value (Purchase)</p>
+                <p className="text-lg font-bold text-text-heading dark:text-dark-text-heading">
+                  Rs. {stockValuation.totalPurchaseValue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted mt-2">{stockValuation.totalBikes} bikes in stock</p>
+          </div>
+          <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <FaArrowUp className="text-green-600 dark:text-green-400" size={20} />
+              </div>
+              <div>
+                <p className="text-xs text-text-muted dark:text-dark-text-muted">Selling Value</p>
+                <p className="text-lg font-bold text-text-heading dark:text-dark-text-heading">
+                  Rs. {stockValuation.totalSellingValue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+              Profit margin: Rs. {stockValuation.totalProfitMargin.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <FaCalculator className="text-purple-600 dark:text-purple-400" size={20} />
+              </div>
+              <div>
+                <p className="text-xs text-text-muted dark:text-dark-text-muted">Available / Sold</p>
+                <p className="text-lg font-bold text-text-heading dark:text-dark-text-heading">
+                  {stockValuation.availableCount} / {stockValuation.soldCount}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-text-muted dark:text-dark-text-muted mt-2">{stockValuation.totalBikes} total bikes</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -163,9 +218,9 @@ const Dashboard = () => {
 
       {/* Bike Form modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-            <BikeForm
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="bg-white dark:bg-dark-surface-alt rounded-2xl border border-border dark:border-dark-border w-full max-w-3xl max-h-[95vh] overflow-y-auto p-6">
+              <BikeForm
               bike={editing}
               onSaved={handleSaved}
               onCancel={() => { setShowForm(false); setEditing(null); }}
@@ -202,9 +257,9 @@ const Dashboard = () => {
 
       {/* AI Assistant Panel */}
       {showAi && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-surface dark:bg-dark-surface rounded-2xl border border-border dark:border-dark-border w-full max-w-lg h-[85vh] flex flex-col overflow-hidden">
-            <AiAssistant onClose={() => setShowAi(false)} />
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="bg-surface dark:bg-dark-surface rounded-2xl border border-border dark:border-dark-border w-full max-w-2xl h-[90vh] flex flex-col overflow-hidden">
+              <AiAssistant onClose={() => setShowAi(false)} />
           </div>
         </div>
       )}

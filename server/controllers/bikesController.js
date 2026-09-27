@@ -16,7 +16,7 @@ export const getBikes = async (req, res) => {
           LIMIT 1
         ) AS cover_image
       FROM bikes b
-      ORDER BY b.created_at DESC
+      ORDER BY CASE WHEN status = 'available' THEN 0 ELSE 1 END, b.created_at DESC
     `);
 
         res.json({
@@ -96,6 +96,7 @@ export const createBike = async (req, res) => {
             model,
             model_year,
             selling_price,
+            purchase_price,
             color,
             engine_cc,
             registration_city,
@@ -123,6 +124,7 @@ export const createBike = async (req, res) => {
         model,
         model_year,
         selling_price,
+        purchase_price,
         color,
         engine_cc,
         registration_city,
@@ -130,7 +132,7 @@ export const createBike = async (req, res) => {
         description,
         created_by
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *
       `,
             [
@@ -138,6 +140,7 @@ export const createBike = async (req, res) => {
                 model,
                 model_year,
                 selling_price,
+                purchase_price || null,
                 color,
                 engine_cc,
                 registration_city,
@@ -180,6 +183,7 @@ export const updateBike = async (req, res) => {
             "model",
             "model_year",
             "selling_price",
+            "purchase_price",
             "color",
             "engine_cc",
             "registration_city",
@@ -299,6 +303,40 @@ export const deleteBike = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to delete bike"
+        });
+    }
+};
+
+// GET stock valuation summary
+export const getStockValuation = async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                COUNT(*) AS total_bikes,
+                COALESCE(SUM(purchase_price), 0) AS total_purchase_value,
+                COALESCE(SUM(selling_price), 0) AS total_selling_value,
+                COALESCE(SUM(selling_price - purchase_price), 0) AS total_profit_margin,
+                COUNT(*) FILTER (WHERE status = 'available') AS available_count,
+                COUNT(*) FILTER (WHERE status = 'sold') AS sold_count
+            FROM bikes
+        `);
+        const row = result.rows[0];
+        res.json({
+            success: true,
+            data: {
+                totalBikes: parseInt(row.total_bikes),
+                totalPurchaseValue: parseFloat(row.total_purchase_value),
+                totalSellingValue: parseFloat(row.total_selling_value),
+                totalProfitMargin: parseFloat(row.total_profit_margin),
+                availableCount: parseInt(row.available_count),
+                soldCount: parseInt(row.sold_count)
+            }
+        });
+    } catch (error) {
+        console.error("Stock valuation error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get stock valuation"
         });
     }
 };

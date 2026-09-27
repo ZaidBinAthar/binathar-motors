@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaMotorcycle, FaCheckCircle, FaPhone, FaEnvelope, FaUser, FaImage, FaTimes } from "react-icons/fa";
 import api from "../api/axios";
 import AutoComplete from "../components/AutoComplete";
@@ -13,6 +13,7 @@ const SellYourBike = () => {
     model: "",
     model_year: "",
     expected_price: "",
+    purchase_price: "",
     color: "",
     engine_cc: "",
     registration_city: "",
@@ -27,16 +28,47 @@ const SellYourBike = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setSuccess(false);
+        setFiles([]);
+        setPreviews([]);
+        setForm({
+          seller_name: "",
+          seller_phone: "",
+          seller_email: "",
+          brand: "",
+          model: "",
+          model_year: "",
+          expected_price: "",
+          purchase_price: "",
+          color: "",
+          engine_cc: "",
+          registration_city: "",
+          condition: "Good",
+          description: "",
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleBrandChange = (brand) => {
-    setForm({ ...form, brand, model: "" });
-  };
-
-  const handleModelChange = (model) => {
-    setForm({ ...form, model });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const elements = Array.from(document.querySelectorAll("input, select, textarea"));
+      const currentIdx = elements.indexOf(e.target);
+      if (currentIdx < elements.length - 1) {
+        const nextEl = elements[currentIdx + 1];
+        if (nextEl && (nextEl.tagName === "INPUT" || nextEl.tagName === "SELECT" || nextEl.tagName === "TEXTAREA")) {
+          nextEl.focus();
+        }
+      }
+    }
   };
 
   const handleFiles = (e) => {
@@ -73,6 +105,7 @@ const SellYourBike = () => {
       formData.append("model", form.model);
       formData.append("model_year", Number(form.model_year));
       formData.append("expected_price", Number(form.expected_price));
+      if (form.purchase_price) formData.append("purchase_price", Number(form.purchase_price));
       if (form.color) formData.append("color", form.color);
       if (form.engine_cc) formData.append("engine_cc", Number(form.engine_cc));
       if (form.registration_city) formData.append("registration_city", form.registration_city);
@@ -121,6 +154,7 @@ const SellYourBike = () => {
                 model: "",
                 model_year: "",
                 expected_price: "",
+                purchase_price: "",
                 color: "",
                 engine_cc: "",
                 registration_city: "",
@@ -139,7 +173,6 @@ const SellYourBike = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-      {/* Header */}
       <div className="text-center mb-10">
         <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <FaMotorcycle className="text-primary text-3xl" />
@@ -152,7 +185,6 @@ const SellYourBike = () => {
         </p>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm p-3 rounded-lg">
@@ -160,7 +192,6 @@ const SellYourBike = () => {
           </div>
         )}
 
-        {/* Seller Info */}
         <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-6">
           <h2 className="text-sm font-semibold text-text-heading dark:text-dark-text-heading mb-4 flex items-center gap-2">
             <FaUser size={14} className="text-primary" /> Your Information
@@ -206,7 +237,6 @@ const SellYourBike = () => {
           </div>
         </div>
 
-          {/* Bike Info */}
         <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-6">
           <h2 className="text-sm font-semibold text-text-heading dark:text-dark-text-heading mb-4 flex items-center gap-2">
             <FaMotorcycle size={14} className="text-primary" /> Bike Details
@@ -266,6 +296,18 @@ const SellYourBike = () => {
 
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
+              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Purchase Price (Rs.)</label>
+              <input
+                name="purchase_price"
+                type="number"
+                min="0"
+                value={form.purchase_price}
+                onChange={handleChange}
+                placeholder="What you paid"
+                className={inputClass}
+              />
+            </div>
+            <div>
               <AutoComplete
                 options={COLORS}
                 value={form.color}
@@ -274,6 +316,9 @@ const SellYourBike = () => {
                 label="Color"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <AutoComplete
                 options={ENGINES.map((e) => `${e}cc`)}
@@ -283,9 +328,6 @@ const SellYourBike = () => {
                 label="Engine (cc)"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <AutoComplete
                 options={CITIES}
@@ -295,6 +337,9 @@ const SellYourBike = () => {
                 label="Registration City"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Condition *</label>
               <select name="condition" value={form.condition} onChange={handleChange} required className={inputClass}>
@@ -303,6 +348,10 @@ const SellYourBike = () => {
                 <option value="Good">Good</option>
                 <option value="Average">Average</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">&nbsp;</label>
+              <span className="text-text-muted text-sm">Press Enter to move to next field, Escape to clear form</span>
             </div>
           </div>
 
@@ -319,7 +368,6 @@ const SellYourBike = () => {
           </div>
         </div>
 
-        {/* Bike Photos */}
         <div className="bg-white dark:bg-dark-surface-alt rounded-xl border border-border dark:border-dark-border p-6">
           <h2 className="text-sm font-semibold text-text-heading dark:text-dark-text-heading mb-4 flex items-center gap-2">
             <FaImage size={14} className="text-primary" /> Bike Photos
@@ -370,7 +418,6 @@ const SellYourBike = () => {
           )}
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={saving}
@@ -380,7 +427,7 @@ const SellYourBike = () => {
         </button>
 
         <p className="text-xs text-center text-text-muted dark:text-dark-text-muted">
-          By submitting, you agree that our team may contact you regarding your bike.
+          By submitting, you agree that our team may contact you regarding your bike. Press Escape to clear the form.
         </p>
       </form>
     </div>

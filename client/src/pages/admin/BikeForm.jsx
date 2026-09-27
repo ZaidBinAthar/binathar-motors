@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FaImage, FaTrash, FaStar, FaMagic, FaRedo } from "react-icons/fa";
 import api from "../../api/axios";
 import AutoComplete from "../../components/AutoComplete";
@@ -10,6 +10,7 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
     model: bike?.model || "",
     model_year: bike?.model_year || "",
     selling_price: bike?.selling_price || "",
+    purchase_price: bike?.purchase_price || "",
     color: bike?.color || "",
     engine_cc: bike?.engine_cc || "",
     registration_city: bike?.registration_city || "",
@@ -18,7 +19,6 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
     description: bike?.description || "",
   });
 
-  // Extra fields for description generation (not saved to DB, only used for AI)
   const [extra, setExtra] = useState({
     mileage: "",
     new_parts: "",
@@ -34,9 +34,32 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
   const [generating, setGenerating] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
   const fileRef = useRef(null);
+  const inputRefs = useRef({});
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onCancel();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCancel]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (e.key === "Enter" && inputRefs.current[name]) {
+      e.preventDefault();
+      const elements = Array.from(document.querySelectorAll('input, select, textarea'));
+      const currentIdx = elements.indexOf(e.target);
+      if (currentIdx < elements.length - 1) {
+        const nextEl = elements[currentIdx + 1];
+        if (nextEl && (nextEl.tagName === 'INPUT' || nextEl.tagName === 'SELECT' || nextEl.tagName === 'TEXTAREA')) {
+          nextEl.focus();
+        }
+      }
+    }
   };
 
   const handleBrandChange = (brand) => {
@@ -134,6 +157,7 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
         ...form,
         model_year: Number(form.model_year),
         selling_price: Number(form.selling_price),
+        purchase_price: form.purchase_price ? Number(form.purchase_price) : undefined,
         engine_cc: form.engine_cc ? Number(form.engine_cc) : undefined,
       };
 
@@ -202,21 +226,28 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Price (Rs.) *</label>
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Selling Price (Rs.) *</label>
           <input name="selling_price" type="number" min="0" value={form.selling_price} onChange={handleChange} required className={inputClass} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Purchase Price (Rs.)</label>
+          <input name="purchase_price" type="number" min="0" value={form.purchase_price} onChange={handleChange} placeholder="Cost price" className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Color</label>
           <AutoComplete
             options={COLORS}
             value={form.color}
             onChange={(v) => setForm({ ...form, color: v })}
             placeholder="Search color..."
-            label="Color"
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <AutoComplete
             options={ENGINES.map((e) => `${e}cc`)}
@@ -226,21 +257,20 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
             label="Engine (cc)"
           />
         </div>
-      </div>
-
-      <div>
-        <AutoComplete
-          options={CITIES}
-          value={form.registration_city}
-          onChange={(v) => setForm({ ...form, registration_city: v })}
-          placeholder="Search city..."
-          label="Registration City"
-        />
+        <div>
+          <AutoComplete
+            options={CITIES}
+            value={form.registration_city}
+            onChange={(v) => setForm({ ...form, registration_city: v })}
+            placeholder="Search city..."
+            label="Registration City"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Condition *</label>
+          <label className="block text-xs font-medium text-text-muted dark:text-text-muted mb-1">Condition *</label>
           <select name="condition" value={form.condition} onChange={handleChange} required className={inputClass}>
             <option value="New">New</option>
             <option value="Excellent">Excellent</option>
@@ -257,7 +287,6 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
         </div>
       </div>
 
-      {/* Description with AI Generator */}
       <div>
         <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Description</label>
         <textarea
@@ -269,7 +298,6 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
           className={`${inputClass} resize-none`}
         />
 
-        {/* AI Generate Button Row */}
         <div className="flex items-center gap-2 mt-2">
           <button
             type="button"
@@ -303,7 +331,6 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
           </button>
         </div>
 
-        {/* Extra fields for better description generation */}
         {showExtra && (
           <div className="mt-3 p-3 bg-surface-alt dark:bg-dark-surface rounded-lg border border-border dark:border-dark-border space-y-3 animate-page-in">
             <p className="text-xs text-text-muted dark:text-dark-text-muted">
@@ -353,11 +380,9 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
         )}
       </div>
 
-      {/* Image Upload */}
       <div>
         <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-2">Photos</label>
 
-        {/* Existing images */}
         {existingImages.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {existingImages.map((img) => (
@@ -381,7 +406,6 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
           </div>
         )}
 
-        {/* New previews */}
         {previews.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {previews.map((src, i) => (

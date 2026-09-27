@@ -6,7 +6,8 @@ import {
     getBikeById,
     createBike,
     updateBike,
-    deleteBike
+    deleteBike,
+    getStockValuation
 } from "../controllers/bikesController.js";
 import {
     uploadImages,
@@ -32,6 +33,7 @@ const upload = multer({
 const router = express.Router();
 
 router.get("/", getBikes);
+router.get("/stock-valuation", getStockValuation);
 router.get("/:id", getBikeById);
 
 router.post("/", requireAuth, requireRole("owner", "admin"), createBike);

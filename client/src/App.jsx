@@ -41,67 +41,18 @@ const App = () => {
                 <Route path="/sell-your-bike" element={<SellYourBike />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute adminOnly>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/users"
-                  element={
-                    <ProtectedRoute ownerOnly>
-                      <Users />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/inquiries"
-                  element={
-                    <ProtectedRoute adminOnly>
-                      <Inquiries />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/inquiries/:id"
-                  element={
-                    <ProtectedRoute adminOnly>
-                      <Chat />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/reports"
-                  element={
-                    <ProtectedRoute ownerOnly>
-                      <Reports />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/reviews"
-                  element={
-                    <ProtectedRoute adminOnly>
-                      <ReviewsManager />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/sell-requests"
-                  element={
-                    <ProtectedRoute adminOnly>
-                      <SellRequests />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </PageTransition>
-          </main>
-          <Footer />
-          <WhatsAppButton />
+                <Route path="/admin" element={<ProtectedRoute adminOnly><Dashboard /></ProtectedRoute>} />
+                <Route path="/admin/users" element={<ProtectedRoute ownerOnly><Users /></ProtectedRoute>} />
+                <Route path="/admin/inquiries" element={<ProtectedRoute adminOnly><Inquiries /></ProtectedRoute>} />
+                <Route path="/admin/inquiries/:id" element={<ProtectedRoute adminOnly><Chat /></ProtectedRoute>} />
+                <Route path="/admin/reports" element={<ProtectedRoute ownerOnly><Reports /></ProtectedRoute>} />
+                <Route path="/admin/reviews" element={<ProtectedRoute adminOnly><ReviewsManager /></ProtectedRoute>} />
+                <Route path="/admin/sell-requests" element={<ProtectedRoute adminOnly><SellRequests /></ProtectedRoute>} />
+                </Routes>
+              </PageTransition>
+            </main>
+            <Footer />
+            <WhatsAppButton />
           </WhatsAppProvider>
         </AuthProvider>
       </ThemeProvider>
