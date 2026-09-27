@@ -1,4 +1,28 @@
+import fs from "fs";
+import path from "path";
 import pool from "../db/index.js";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
+
+const s3 = new S3Client({
+    endpoint: process.env.NEON_STORAGE_ENDPOINT,
+    region: process.env.NEON_STORAGE_REGION,
+    credentials: {
+        accessKeyId: process.env.NEON_STORAGE_ACCESS_KEY,
+        secretAccessKey: process.env.NEON_STORAGE_SECRET_KEY || "",
+    },
+    forcePathStyle: true,
+});
+
+const BUCKET = process.env.NEON_STORAGE_BUCKET;
+
+function generateFilename(originalname) {
+    const ext = originalname.split(".").pop();
+    return `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
+}
 
 // POST /api/bikes/:id/images
 export const uploadImages = async (req, res) => {
@@ -26,10 +50,27 @@ export const uploadImages = async (req, res) => {
 
         const inserted = [];
         for (const file of req.files) {
-            const base64Data = file.buffer.toString("base64");
-            const mimeType = file.mimetype || "image/jpeg";
-            const imageUrl = `data:${mimeType};base64,${base64Data}`;
+            const filename = generateFilename(file.originalname);
+            const imageUrl = `/uploads/${filename}`;
             const isCover = sortOrder === 0;
+
+            // Try S3 upload
+            let s3Success = false;
+            try {
+                await s3.send(new PutObjectCommand({
+                    Bucket: BUCKET,
+                    Key: filename,
+                    Body: file.buffer,
+                    ContentType: file.mimetype || "image/jpeg",
+                    ACL: "public-read",
+                }));
+                s3Success = true;
+            } catch (s3Err) {
+                console.error("S3 upload error, falling back to disk:", s3Err.message);
+                // Fallback: write to disk
+                const filePath = path.join(UPLOADS_DIR, filename);
+                fs.writeFileSync(filePath, file.buffer);
+            }
 
             const result = await pool.query(
                 `INSERT INTO bike_images (bike_id, image_url, is_cover, sort_order)

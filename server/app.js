@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import pool from "./db/index.js";
 import authRoutes from "./routes/authRoutes.js";
 import bikesRoutes from "./routes/bikesRoutes.js";
@@ -11,10 +13,13 @@ import reviewsRoutes from "./routes/reviewsRoutes.js";
 import sellRequestsRoutes from "./routes/sellRequestsRoutes.js";
 import aiAssistantRoutes from "./routes/aiAssistantRoutes.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Test API + Database
 app.get("/api/test", async (req, res) => {
