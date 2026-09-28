@@ -19,6 +19,7 @@ export const BRANDS = [
   "Vespa",
   "Volkswagen",
   "Peugeot",
+  "Road Prince",
 ];
 
 export const BRAND_MODELS = {
@@ -226,6 +227,16 @@ export const BRAND_MODELS = {
   Vespa: ["Vespa Primavera", "Vespa Sprint", "Vespa GTS", "Vespa LX 125", "Vespa 150"],
   Volkswagen: ["Evo 200", "Evo 150"],
   Peugeot: ["Vivacity", "Streetzone", "Speedfight", "Landrix"],
+  "Road Prince": [
+    "RP 70",
+    "RP 110",
+    "RP 125",
+    "RP 125 Euro II",
+    "RP 70cc",
+    "RP 125cc",
+    "Wego 125",
+    "RP 100",
+  ],
 };
 
 export const YEARS = Array.from({ length: 38 }, (_, i) => 1990 + i);
@@ -306,6 +317,16 @@ export const CITIES = [
   "Haripur",
   "Karak",
   "Havelian",
+];
+
+export const PROVINCES = [
+  "Punjab",
+  "Sindh",
+  "Khyber Pakhtunkhwa",
+  "Balochistan",
+  "Gilgit-Baltistan",
+  "Azad Kashmir",
+  "Islamabad Capital Territory",
 ];
 
 export function getModels(brand) {

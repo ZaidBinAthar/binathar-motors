@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FaImage, FaTrash, FaStar, FaMagic, FaRedo } from "react-icons/fa";
 import api from "../../api/axios";
-import AutoComplete from "../../components/AutoComplete";
-import { BRANDS, BRAND_MODELS, YEARS, COLORS, ENGINES, CITIES, getModels } from "../../utils/bikeOptions";
+import { YEARS } from "../../utils/bikeOptions";
 
 const BikeForm = ({ bike, onSaved, onCancel }) => {
   const [form, setForm] = useState({
@@ -60,14 +59,6 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
         }
       }
     }
-  };
-
-  const handleBrandChange = (brand) => {
-    setForm({ ...form, brand, model: "" });
-  };
-
-  const handleModelChange = (model) => {
-    setForm({ ...form, model });
   };
 
   const handleExtraChange = (e) => {
@@ -157,8 +148,8 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
         ...form,
         model_year: Number(form.model_year),
         selling_price: Number(form.selling_price),
-        purchase_price: form.purchase_price ? Number(form.purchase_price) : undefined,
-        engine_cc: form.engine_cc ? Number(form.engine_cc) : undefined,
+        purchase_price: form.purchase_price ? Number(form.purchase_price) : null,
+        engine_cc: form.engine_cc ? Number(form.engine_cc) : null,
       };
 
       let bikeId;
@@ -196,22 +187,12 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <AutoComplete
-            options={BRANDS}
-            value={form.brand}
-            onChange={handleBrandChange}
-            placeholder="Search brand..."
-            label="Brand *"
-          />
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Brand *</label>
+          <input name="brand" value={form.brand} onChange={handleChange} placeholder="e.g. Honda" required className={inputClass} />
         </div>
         <div>
-          <AutoComplete
-            options={getModels(form.brand)}
-            value={form.model}
-            onChange={handleModelChange}
-            placeholder={form.brand ? "Search model..." : "Select brand first"}
-            label="Model *"
-          />
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Model *</label>
+          <input name="model" value={form.model} onChange={handleChange} placeholder="e.g. CD 70" required className={inputClass} />
         </div>
       </div>
 
@@ -238,33 +219,18 @@ const BikeForm = ({ bike, onSaved, onCancel }) => {
         </div>
         <div>
           <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Color</label>
-          <AutoComplete
-            options={COLORS}
-            value={form.color}
-            onChange={(v) => setForm({ ...form, color: v })}
-            placeholder="Search color..."
-          />
+          <input name="color" value={form.color} onChange={handleChange} placeholder="e.g. Black" className={inputClass} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <AutoComplete
-            options={ENGINES.map((e) => `${e}cc`)}
-            value={form.engine_cc ? `${form.engine_cc}cc` : ""}
-            onChange={(v) => setForm({ ...form, engine_cc: Number(v.replace("cc", "")) })}
-            placeholder="Search engine..."
-            label="Engine (cc)"
-          />
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Engine (cc)</label>
+          <input name="engine_cc" type="number" min="0" value={form.engine_cc} onChange={handleChange} placeholder="e.g. 125" className={inputClass} />
         </div>
         <div>
-          <AutoComplete
-            options={CITIES}
-            value={form.registration_city}
-            onChange={(v) => setForm({ ...form, registration_city: v })}
-            placeholder="Search city..."
-            label="Registration City"
-          />
+          <label className="block text-xs font-medium text-text-muted dark:text-dark-text-muted mb-1">Registration</label>
+          <input name="registration_city" value={form.registration_city} onChange={handleChange} placeholder="City or province" className={inputClass} />
         </div>
       </div>
 
