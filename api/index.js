@@ -60,6 +60,10 @@ const defaultMeta = {
     url: SITE_URL,
 };
 
+app.use("/uploads", (req, res) => {
+    res.status(404).send("Not found");
+});
+
 app.use((req, res) => {
     if (!indexHtml) {
         return res.status(404).json({ success: false, message: "Not found" });
@@ -82,7 +86,9 @@ app.use((req, res) => {
                 const bike = rows[0];
                 const title = `${bike.brand} ${bike.model} ${bike.model_year} – Rs. ${Number(bike.selling_price).toLocaleString()} | BinAthar Motors`;
                 const description = bike.description || `Buy ${bike.brand} ${bike.model} ${bike.model_year} for Rs. ${Number(bike.selling_price).toLocaleString()} at BinAthar Motors.`;
-                const image = bike.cover_image || defaultMeta.image;
+                const image = bike.cover_image
+                    ? (bike.cover_image.startsWith("/") ? `${SITE_URL}${bike.cover_image}` : bike.cover_image)
+                    : defaultMeta.image;
                 const url = `${SITE_URL}/bikes/${bikeId}`;
 
                 const metaTags = `

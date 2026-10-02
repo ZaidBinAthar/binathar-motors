@@ -1,11 +1,15 @@
 import fs from "fs";
 import path from "path";
 import pool from "../db/index.js";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
+
+const STORAGE_ENDPOINT = (process.env.NEON_STORAGE_ENDPOINT || "").replace(/\/+$/, "");
+const BUCKET = process.env.NEON_STORAGE_BUCKET;
+const STORAGE_ENABLED = Boolean(STORAGE_ENDPOINT && BUCKET && process.env.NEON_STORAGE_ACCESS_KEY);
 
 const s3 = new S3Client({
     endpoint: process.env.NEON_STORAGE_ENDPOINT,
@@ -17,7 +21,9 @@ const s3 = new S3Client({
     forcePathStyle: true,
 });
 
-const BUCKET = process.env.NEON_STORAGE_BUCKET;
+function publicObjectUrl(filename) {
+    return `${STORAGE_ENDPOINT}/${BUCKET}/${filename}`;
+}
 
 function generateFilename(originalname) {
     const ext = originalname.split(".").pop();
@@ -51,25 +57,29 @@ export const uploadImages = async (req, res) => {
         const inserted = [];
         for (const file of req.files) {
             const filename = generateFilename(file.originalname);
-            const imageUrl = `/uploads/${filename}`;
             const isCover = sortOrder === 0;
+            let imageUrl = null;
 
-            // Try S3 upload
-            let s3Success = false;
-            try {
-                await s3.send(new PutObjectCommand({
-                    Bucket: BUCKET,
-                    Key: filename,
-                    Body: file.buffer,
-                    ContentType: file.mimetype || "image/jpeg",
-                    ACL: "public-read",
-                }));
-                s3Success = true;
-            } catch (s3Err) {
-                console.error("S3 upload error, falling back to disk:", s3Err.message);
-                // Fallback: write to disk
-                const filePath = path.join(UPLOADS_DIR, filename);
-                fs.writeFileSync(filePath, file.buffer);
+            // Primary: object storage (Neon S3-compatible, public bucket)
+            if (STORAGE_ENABLED) {
+                try {
+                    await s3.send(new PutObjectCommand({
+                        Bucket: BUCKET,
+                        Key: filename,
+                        Body: file.buffer,
+                        ContentType: file.mimetype || "image/jpeg",
+                    }));
+                    imageUrl = publicObjectUrl(filename);
+                } catch (s3Err) {
+                    console.error("S3 upload error, falling back to disk:", s3Err.message);
+                }
+            }
+
+            // Fallback: local disk (localhost dev only — read-only on Vercel)
+            if (!imageUrl) {
+                fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+                fs.writeFileSync(path.join(UPLOADS_DIR, filename), file.buffer);
+                imageUrl = `/uploads/${filename}`;
             }
 
             const result = await pool.query(
@@ -100,6 +110,18 @@ export const deleteImage = async (req, res) => {
 
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: "Image not found" });
+        }
+
+        const deleted = result.rows[0];
+        if (STORAGE_ENABLED && deleted.image_url?.startsWith(`${STORAGE_ENDPOINT}/${BUCKET}/`)) {
+            try {
+                await s3.send(new DeleteObjectCommand({
+                    Bucket: BUCKET,
+                    Key: deleted.image_url.slice(`${STORAGE_ENDPOINT}/${BUCKET}/`.length),
+                }));
+            } catch (s3Err) {
+                console.error("S3 delete error:", s3Err.message);
+            }
         }
 
         const remaining = await pool.query(
