@@ -71,6 +71,14 @@ const SellYourBike = () => {
     }
   };
 
+  const handleBrandChange = (brand) => {
+    setForm((prev) => ({ ...prev, brand, model: "" }));
+  };
+
+  const handleModelChange = (model) => {
+    setForm((prev) => ({ ...prev, model }));
+  };
+
   const handleFiles = (e) => {
     const selected = Array.from(e.target.files);
     if (files.length + selected.length > 5) {
