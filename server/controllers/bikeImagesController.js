@@ -175,18 +175,17 @@ export const uploadImages = async (req, res) => {
                     console.log("Image uploaded successfully to Neon Storage");
 
                 } catch (s3Err) {
-                    console.error("Neon Storage upload failed:", {
-                        name: s3Err.name,
-                        message: s3Err.message,
-                        code: s3Err.Code,
-                        statusCode: s3Err.$metadata?.httpStatusCode,
-                    });
+                    console.error("========== NEON STORAGE ERROR ==========");
+                    console.error("Name:", s3Err.name);
+                    console.error("Message:", s3Err.message);
+                    console.error("Code:", s3Err.Code || s3Err.code);
+                    console.error("HTTP Status:", s3Err.$metadata?.httpStatusCode);
+                    console.error("Request ID:", s3Err.$metadata?.requestId);
+                    console.error("Stack:", s3Err.stack);
+                    console.error("========================================");
 
-                    // Never use disk fallback on Vercel
                     if (IS_PRODUCTION) {
-                        throw new Error(
-                            "Neon Object Storage upload failed. Check server logs."
-                        );
+                        throw s3Err;
                     }
                 }
             }
@@ -240,11 +239,7 @@ export const uploadImages = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Upload images error:", {
-            name: error.name,
-            message: error.message,
-            code: error.Code || error.code,
-        });
+        console.error("FINAL IMAGE UPLOAD ERROR:", error);
 
         return res.status(500).json({
             success: false,
